@@ -1,3 +1,13 @@
+# Loop inside:
+#   Ask: roll the dice?
+#   If user enters y
+#     Generate two random numbers between 1 and 6
+#     Print them
+#   If user enters n
+#     Print "Thank you for playing! Goodbye!"
+#     Terminate the program
+#   Else
+#     Print "Invalid input. Please enter 'y' or 'n'."
 import random
 
 while True:
