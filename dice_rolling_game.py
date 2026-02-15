@@ -14,9 +14,14 @@ import random
 # Step 12: Handle invalid main-menu input.
 # Step 13: Add Modes (Classic (normal dice), Lucky (win or doubles), Risk (if total < 7 lose points)))
 # Step 14: Add Player Points to track score across rounds (e.g +10 for points double, +5 if total > 8, -3 if total < 5)
+# Step 15: Add Statistics (total rolls, total doubles, average roll value, highest roll, lowest roll)
 
 roll_count = 0
 player_points = 0
+total_doubles = 0
+total_roll_value = 0
+highest_roll = 0
+lowest_roll = 0
 modes = ["classic", "lucky", "risk"]
 
 while True:
@@ -37,6 +42,13 @@ while True:
 
         dice_rolls = [random.randint(1, 6) for _ in range(num_dice)]
         total = sum(dice_rolls)
+        total_roll_value += total
+        if total > highest_roll:
+            highest_roll = total
+        if lowest_roll == 0 or total < lowest_roll:
+            lowest_roll = total
+        if len(set(dice_rolls)) == 1:
+            total_doubles += 1
         rolled_numbers = ", ".join(map(str, dice_rolls))
 
         has_doubles = len(set(dice_rolls)) == 1
@@ -45,7 +57,7 @@ while True:
                 print(
                     f'\nYou rolled: {rolled_numbers} (Congratulations! You win!)')
                 player_points += 5  # Award points for winning
-                print(f'Your current points: {player_points}')
+                print(f'Your current points: {player_points}\n')
             elif total == 10:
                 print(
                     f'\nYou rolled: {rolled_numbers} (It\'s a draw! Try again!)')
@@ -53,10 +65,16 @@ while True:
                 print(
                     f'\nYou rolled: {rolled_numbers} (Sorry, you lose!)')
                 player_points -= 3  # Deduct points for losing
-                print(f'Your current points: {player_points}')
+                print(f'Your current points: {player_points}\n')
             print(f'Total score: {total}')
             roll_count += 1
             print(f'You have rolled the dice {roll_count} times. \n')
+            if roll_count > 0:
+                average_roll = total_roll_value // roll_count
+                print(f'Average roll value: {average_roll:.2f}')
+                print(f'Total doubles rolled: {total_doubles}')
+                print(f'Highest roll: {highest_roll}')
+                print(f'Lowest roll: {lowest_roll}\n')
         if mode_input == "lucky":
             if has_doubles:
                 print(
@@ -76,10 +94,16 @@ while True:
                 print(
                     f'\nYou rolled: {rolled_numbers} (Sorry, you lose!)')
                 player_points -= 3  # Deduct points for losing
-                print(f'Your current points: {player_points}')
+                print(f'Your current points: {player_points}\n')
             print(f'Total score: {total}')
             roll_count += 1
             print(f'You have rolled the dice {roll_count} times. \n')
+            if roll_count > 0:
+                average_roll = total_roll_value // roll_count
+                print(f'Average roll value: {average_roll:.2f}')
+                print(f'Total doubles rolled: {total_doubles}')
+                print(f'Highest roll: {highest_roll}')
+                print(f'Lowest roll: {lowest_roll}\n')
         if mode_input == "risk":
             if total < 7:
                 print(
@@ -90,13 +114,19 @@ while True:
                 print(
                     f'\nYou rolled: {rolled_numbers} (Congratulations! You win!)')
                 player_points += 5  # Award points for winning
-                print(f'Your current points: {player_points}')
+                print(f'Your current points: {player_points}\n')
             else:
                 print(
                     f'\nYou rolled: {rolled_numbers} (It\'s a draw! Try again!)')
             print(f'Total score: {total}')
             roll_count += 1
             print(f'You have rolled the dice {roll_count} times. \n')
+            if roll_count > 0:
+                average_roll = total_roll_value // roll_count
+                print(f'Average roll value: {average_roll:.2f}')
+                print(f'Total doubles rolled: {total_doubles}')
+                print(f'Highest roll: {highest_roll}')
+                print(f'Lowest roll: {lowest_roll}\n')
     elif user_input == 'n':
         print('\nThank you for playing! Goodbye!')
         break
