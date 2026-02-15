@@ -13,8 +13,10 @@ import random
 # Step 11: Exit the game loop when player chooses to stop.
 # Step 12: Handle invalid main-menu input.
 # Step 13: Add Modes (Classic (normal dice), Lucky (win or doubles), Risk (if total < 7 lose points)))
+# Step 14: Add Player Points to track score across rounds (e.g +10 for points double, +5 if total > 8, -3 if total < 5)
 
 roll_count = 0
+player_points = 0
 modes = ["classic", "lucky", "risk"]
 
 while True:
@@ -42,26 +44,39 @@ while True:
             if total > 10:
                 print(
                     f'\nYou rolled: {rolled_numbers} (Congratulations! You win!)')
+                player_points += 5  # Award points for winning
+                print(f'Your current points: {player_points}')
             elif total == 10:
                 print(
                     f'\nYou rolled: {rolled_numbers} (It\'s a draw! Try again!)')
             else:
                 print(
                     f'\nYou rolled: {rolled_numbers} (Sorry, you lose!)')
+                player_points -= 3  # Deduct points for losing
+                print(f'Your current points: {player_points}')
             print(f'Total score: {total}')
             roll_count += 1
             print(f'You have rolled the dice {roll_count} times. \n')
         if mode_input == "lucky":
             if has_doubles:
                 print(
-                    f'\nYou rolled: {rolled_numbers} (Doubles! You get an extra turn!)\n')
+                    f'\nYou rolled: {rolled_numbers} (Doubles! You get an extra turn!)')
+                player_points += 10  # Award points for doubles
+                print(f'Your current points: {player_points}\n')
                 continue  # Allow the player to roll again immediately
             elif total > 10:
                 print(
                     f'\nYou rolled: {rolled_numbers} (Congratulations! You win!)')
+                player_points += 5  # Award points for winning
+                print(f'Your current points: {player_points}\n')
+            elif total == 10:
+                print(
+                    f'\nYou rolled: {rolled_numbers} (It\'s a draw! Try again!)')
             else:
                 print(
                     f'\nYou rolled: {rolled_numbers} (Sorry, you lose!)')
+                player_points -= 3  # Deduct points for losing
+                print(f'Your current points: {player_points}')
             print(f'Total score: {total}')
             roll_count += 1
             print(f'You have rolled the dice {roll_count} times. \n')
@@ -69,9 +84,13 @@ while True:
             if total < 7:
                 print(
                     f'\nYou rolled: {rolled_numbers} (Risky! You lose points!)')
+                player_points -= 3  # Deduct points for risky roll
+                print(f'Your current points: {player_points}\n')
             elif total > 10:
                 print(
                     f'\nYou rolled: {rolled_numbers} (Congratulations! You win!)')
+                player_points += 5  # Award points for winning
+                print(f'Your current points: {player_points}')
             else:
                 print(
                     f'\nYou rolled: {rolled_numbers} (It\'s a draw! Try again!)')
