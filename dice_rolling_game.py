@@ -56,4 +56,4 @@ while True:
         print('Thank you for playing! Goodbye!')
         break
     else:
-        print("Invalid input. Please enter 'y' or 'n'.")
+        print("Invalid input. Please enter 'y' or 'n'.\n")
