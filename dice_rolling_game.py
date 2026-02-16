@@ -15,6 +15,7 @@ import random
 # Step 13: Add Modes (Classic (normal dice), Lucky (win or doubles), Risk (if total < 7 lose points)))
 # Step 14: Add Player Points to track score across rounds (e.g +10 for points double, +5 if total > 8, -3 if total < 5)
 # Step 15: Add Statistics (total rolls, total doubles, average roll value, highest roll, lowest roll)
+# Step 16: Add dice types (e.g. D4, D6, D8, D10, D12, D20) and allow player to choose which type of dice to roll.
 
 roll_count = 0
 player_points = 0
@@ -40,7 +41,16 @@ while True:
             print('\nInvalid mode. Please select a valid mode.\n')
             continue
 
-        dice_rolls = [random.randint(1, 6) for _ in range(num_dice)]
+        dice_type_input = input(
+            'Choose a dice type (D4, D6, D8, D10, D12, D20): ').upper()
+        dice_types = {"D4": 4, "D6": 6, "D8": 8,
+                      "D10": 10, "D12": 12, "D20": 20}
+        if dice_type_input not in dice_types:
+            print('\nInvalid dice type. Please select a valid dice type.\n')
+            continue
+        dice_sides = dice_types[dice_type_input]
+
+        dice_rolls = [random.randint(1, dice_sides) for _ in range(num_dice)]
         total = sum(dice_rolls)
         total_roll_value += total
         highest_roll = max(highest_roll, total)
