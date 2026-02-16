@@ -1,6 +1,14 @@
 # DiceRollingGame
 
-A lightweight Dice Rolling application exploring RNG (Random Number Generation) and event-driven logic with multiple game modes for varied gameplay experiences.
+A lightweight Dice Rolling application exploring RNG (Random Number Generation) and event-driven logic with multiple game modes for varied gameplay experiences. Features comprehensive statistics tracking and a dynamic point system.
+
+## Features
+
+- **Three Game Modes**: Classic, Lucky, and Risk modes with unique rules
+- **Point System**: Earn and lose points based on performance
+- **Comprehensive Statistics**: Track rolls, averages, doubles, and extremes
+- **Input Validation**: Robust error handling for user inputs
+- **Continuous Play**: Roll until you choose to quit
 
 ## Game Modes
 
@@ -8,33 +16,64 @@ The game features three distinct modes, each with unique rules and outcomes:
 
 ### Classic Mode
 - Traditional dice rolling experience
-- **Win**: Total > 10
-- **Draw**: Total = 10  
-- **Lose**: Total < 10
+- **Win**: Total > 10 (+5 points)
+- **Draw**: Total = 10 (no points)
+- **Lose**: Total < 10 (-3 points)
 
 ### Lucky Mode
 - Features special doubles mechanic
-- **Doubles**: If all dice match, get an extra turn immediately!
-- **Win**: Total > 10 (if no doubles)
-- **Lose**: Total ≤ 10 (if no doubles)
+- **Doubles**: If all dice match, get +10 points and an extra turn immediately!
+- **Win**: Total > 10 (+5 points)
+- **Draw**: Total = 10 (no points)
+- **Lose**: Total < 10 (-3 points)
 
 ### Risk Mode
 - High-stakes gameplay with penalty for low rolls
-- **Risky Loss**: Total < 7 (lose points!)
-- **Win**: Total > 10
-- **Draw**: Total 7-10
+- **Risky Loss**: Total < 7 (-3 points)
+- **Win**: Total > 10 (+5 points)
+- **Draw**: Total 7-10 (no points)
 
-## How it works
+## Point System
 
-1. The game starts by setting a counter for completed rolls.
-2. It repeatedly asks: `Roll the dice? (y/n)`.
-3. If you enter `y`, it asks how many dice to roll.
-4. The dice count is validated:
-    - Must be a number
-    - Must be at least 2
-5. You choose a game mode: Classic, Lucky, or Risk.
-6. The game rolls the selected number of dice (`1` to `6`) and sums the total.
-7. The outcome is determined based on your selected mode's rules (see above).
-8. It prints your total score and increments the completed-roll counter.
-9. If you enter `n` at the main prompt, the game exits with a goodbye message.
-10. Any invalid input (menu choice or mode selection) prompts you to try again.
+- **+10 points**: Rolling doubles (all dice same value) in Lucky mode
+- **+5 points**: Winning a round (total > 10)
+- **-3 points**: Losing a round or rolling risky (total < 7 in Risk mode)
+
+## Statistics Tracked
+
+The game automatically tracks and displays:
+- **Roll Count**: Total number of completed rolls
+- **Player Points**: Current point balance
+- **Average Roll**: Mean value across all rolls
+- **Total Doubles**: Number of times all dice matched
+- **Highest Roll**: Maximum total achieved
+- **Lowest Roll**: Minimum total achieved
+
+## How to Play
+
+1. Run the game: `python dice_rolling_game.py`
+2. Choose to roll dice or quit: `Roll the dice? (y/n)`
+3. If rolling, specify number of dice (minimum 2)
+4. Select a game mode: Classic, Lucky, or Risk
+5. View your results, points, and statistics
+6. Continue playing or quit
+
+## Requirements
+
+- Python 3.x
+- No external dependencies (uses built-in `random` module)
+
+## Installation & Usage
+
+```bash
+# Clone or download the file
+python dice_rolling_game.py
+```
+
+## Input Validation
+
+The game includes robust input validation:
+- Dice count must be a valid number ≥ 2
+- Game mode must be one of: classic, lucky, risk
+- Main menu accepts only 'y' or 'n'
+- Invalid inputs prompt retry with helpful messages
