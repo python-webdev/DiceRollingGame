@@ -43,10 +43,9 @@ while True:
         dice_rolls = [random.randint(1, 6) for _ in range(num_dice)]
         total = sum(dice_rolls)
         total_roll_value += total
-        if total > highest_roll:
-            highest_roll = total
-        if lowest_roll == 0 or total < lowest_roll:
-            lowest_roll = total
+        highest_roll = max(highest_roll, total)
+        lowest_roll = float('inf')
+        lowest_roll = min(lowest_roll, total)
         if len(set(dice_rolls)) == 1:
             total_doubles += 1
         rolled_numbers = ", ".join(map(str, dice_rolls))
@@ -57,7 +56,7 @@ while True:
                 print(
                     f'\nYou rolled: {rolled_numbers} (Congratulations! You win!)')
                 player_points += 5  # Award points for winning
-                print(f'Your current points: {player_points}\n')
+                print(f'Your current points: {player_points}')
             elif total == 10:
                 print(
                     f'\nYou rolled: {rolled_numbers} (It\'s a draw! Try again!)')
@@ -65,7 +64,7 @@ while True:
                 print(
                     f'\nYou rolled: {rolled_numbers} (Sorry, you lose!)')
                 player_points -= 3  # Deduct points for losing
-                print(f'Your current points: {player_points}\n')
+                print(f'Your current points: {player_points}')
             print(f'Total score: {total}')
             roll_count += 1
             print(f'You have rolled the dice {roll_count} times. \n')
@@ -80,13 +79,13 @@ while True:
                 print(
                     f'\nYou rolled: {rolled_numbers} (Doubles! You get an extra turn!)')
                 player_points += 10  # Award points for doubles
-                print(f'Your current points: {player_points}\n')
+                print(f'Your current points: {player_points} \n')
                 continue  # Allow the player to roll again immediately
-            elif total > 10:
+            if total > 10:
                 print(
                     f'\nYou rolled: {rolled_numbers} (Congratulations! You win!)')
                 player_points += 5  # Award points for winning
-                print(f'Your current points: {player_points}\n')
+                print(f'Your current points: {player_points}')
             elif total == 10:
                 print(
                     f'\nYou rolled: {rolled_numbers} (It\'s a draw! Try again!)')
@@ -94,7 +93,7 @@ while True:
                 print(
                     f'\nYou rolled: {rolled_numbers} (Sorry, you lose!)')
                 player_points -= 3  # Deduct points for losing
-                print(f'Your current points: {player_points}\n')
+                print(f'Your current points: {player_points}')
             print(f'Total score: {total}')
             roll_count += 1
             print(f'You have rolled the dice {roll_count} times. \n')
@@ -109,12 +108,12 @@ while True:
                 print(
                     f'\nYou rolled: {rolled_numbers} (Risky! You lose points!)')
                 player_points -= 3  # Deduct points for risky roll
-                print(f'Your current points: {player_points}\n')
+                print(f'Your current points: {player_points}')
             elif total > 10:
                 print(
                     f'\nYou rolled: {rolled_numbers} (Congratulations! You win!)')
                 player_points += 5  # Award points for winning
-                print(f'Your current points: {player_points}\n')
+                print(f'Your current points: {player_points}')
             else:
                 print(
                     f'\nYou rolled: {rolled_numbers} (It\'s a draw! Try again!)')
