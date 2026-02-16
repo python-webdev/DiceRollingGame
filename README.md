@@ -4,23 +4,46 @@ A lightweight Dice Rolling application exploring RNG (Random Number Generation) 
 
 ## Features
 
-- **Three Game Modes**: Classic, Lucky, and Risk modes with unique rules
-- **Point System**: Earn and lose points based on performance
-- **Comprehensive Statistics**: Track rolls, averages, doubles, and extremes
-- **Input Validation**: Robust error handling for user inputs
-- **Continuous Play**: Roll until you choose to quit
+- **Three Game Modes**: Classic, Lucky, and Risk with distinct scoring rules
+- **Multiple Dice Types**: Choose from D4, D6, D8, D10, D12, or D20
+- **Dynamic Round Setup**: Select how many dice to roll (minimum 2)
+- **Point Tracking**: Gain/lose points across rounds based on outcomes
+- **Live Statistics**: Shows roll count, doubles, average, highest, and lowest values
+- **Input Validation**: Handles invalid yes/no, dice count, mode, and dice type entries
+
+## Game Flow
+
+This is the round flow in the order the script executes:
+
+1. Game starts and initializes counters (rolls, points, doubles, roll stats).
+2. Prompt appears: `Roll the dice? (y/n)`.
+3. If `n`, game exits with a goodbye message.
+4. If `y`, player enters number of dice.
+5. Dice count is validated (must be numeric and at least 2).
+6. Player chooses mode: `Classic`, `Lucky`, or `Risk`.
+7. Mode is validated.
+8. Player chooses dice type: `D4`, `D6`, `D8`, `D10`, `D12`, or `D20`.
+9. Dice type is validated and mapped to number of sides.
+10. Script rolls all selected dice and calculates total score.
+11. Script checks for doubles (all dice values matching).
+12. Mode-specific win/lose/draw rules are applied and points are updated.
+13. In Lucky mode, doubles grant +10 points and an immediate extra turn.
+14. Roll count and statistics are displayed after completed rounds.
+15. Loop continues until player chooses `n` at the main prompt.
 
 ## Game Modes
 
 The game features three distinct modes, each with unique rules and outcomes:
 
 ### Classic Mode
+
 - Traditional dice rolling experience
 - **Win**: Total > 10 (+5 points)
 - **Draw**: Total = 10 (no points)
 - **Lose**: Total < 10 (-3 points)
 
 ### Lucky Mode
+
 - Features special doubles mechanic
 - **Doubles**: If all dice match, get +10 points and an extra turn immediately!
 - **Win**: Total > 10 (+5 points)
@@ -28,6 +51,7 @@ The game features three distinct modes, each with unique rules and outcomes:
 - **Lose**: Total < 10 (-3 points)
 
 ### Risk Mode
+
 - High-stakes gameplay with penalty for low rolls
 - **Risky Loss**: Total < 7 (-3 points)
 - **Win**: Total > 10 (+5 points)
@@ -42,6 +66,7 @@ The game features three distinct modes, each with unique rules and outcomes:
 ## Statistics Tracked
 
 The game automatically tracks and displays:
+
 - **Roll Count**: Total number of completed rolls
 - **Player Points**: Current point balance
 - **Average Roll**: Mean value across all rolls
@@ -73,7 +98,9 @@ python dice_rolling_game.py
 ## Input Validation
 
 The game includes robust input validation:
+
 - Dice count must be a valid number ≥ 2
 - Game mode must be one of: classic, lucky, risk
+- Dice type must be one of: D4, D6, D8, D10, D12, D20
 - Main menu accepts only 'y' or 'n'
 - Invalid inputs prompt retry with helpful messages
