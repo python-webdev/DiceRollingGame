@@ -90,7 +90,7 @@ def outcome_from_total(total: int) -> str:
 def apply_points(mode: str, total: int, has_match: bool) -> int:
     """
     Returns point delta for this turn.
-    Your rules:
+    Point rules:
     +10 for doubles (lucky mode extra turn)
     +5 if total > 8 (we'll interpret as win condition in your current code: total > 10 -> +5)
     -3 if total < 5 / losing / risky (<7)
