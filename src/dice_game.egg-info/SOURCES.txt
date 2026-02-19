@@ -1,0 +1,17 @@
+README.md
+pyproject.toml
+src/dice_game/__init__.py
+src/dice_game/dice.py
+src/dice_game/main.py
+src/dice_game/rules.py
+src/dice_game/stats.py
+src/dice_game/ui.py
+src/dice_game.egg-info/PKG-INFO
+src/dice_game.egg-info/SOURCES.txt
+src/dice_game.egg-info/dependency_links.txt
+src/dice_game.egg-info/top_level.txt
+tests/test_dice.py
+tests/test_main.py
+tests/test_rules.py
+tests/test_stats.py
+tests/test_ui.py

@@ -1,4 +1,4 @@
-from src.dice_game.ui import ask_yes_no, ask_int, choose_mode, choose_dice_sides, format_rolls
+from dice_game.ui import ask_yes_no, ask_int, choose_mode, choose_dice_sides, format_rolls
 
 
 def test_ask_yes_no_valid_inputs(monkeypatch):

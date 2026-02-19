@@ -1,4 +1,4 @@
-from src.dice_game.dice import all_match
+from dice_game.dice import all_match
 
 
 def test_all_match_true_for_same_values():

@@ -1,4 +1,4 @@
-from src.dice_game.stats import Stats
+from dice_game.stats import Stats
 
 
 def test_stats_update_increments_roll_count():

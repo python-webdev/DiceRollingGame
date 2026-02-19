@@ -1,7 +1,7 @@
-from dice_game.dice import roll_dice, all_match
-from dice_game.rules import outcome_from_total, apply_points
-from dice_game.stats import Stats
-from dice_game.ui import ask_yes_no, ask_int, choose_mode, choose_dice_sides, format_rolls
+from .dice import roll_dice, all_match
+from .rules import outcome_from_total, apply_points
+from .stats import Stats
+from .ui import ask_yes_no, ask_int, choose_mode, choose_dice_sides, format_rolls
 
 min_dice = 2
 

@@ -1,4 +1,4 @@
-from src.dice_game.rules import outcome_from_total, apply_points
+from dice_game.rules import outcome_from_total, apply_points
 
 
 def test_outcome_from_total_win():

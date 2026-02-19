@@ -1,5 +1,5 @@
-from dice_game.dice import dice_types
-from dice_game.rules import modes
+from .dice import dice_types
+from .rules import modes
 
 
 def ask_yes_no(prompt: str) -> str:
