@@ -8,6 +8,7 @@
 #     Terminate the program
 #   Else
 #     Print "Invalid input. Please enter 'y' or 'n'."
+
 import random
 
 while True:
