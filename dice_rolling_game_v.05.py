@@ -28,24 +28,30 @@ while True:
     user_input = input('Roll the dice? (y/n): ').lower()
     if user_input == 'y':
         dice_input = input('How many dice would you like to roll? ')
-        if not dice_input.isdigit():
-            print('\nInvalid input. Please enter a valid number for dice count.\n')
+        try:
+            if not dice_input.isdigit():
+                raise ValueError(
+                    'Invalid input. Dice count must be a number.')
+            num_dice = int(dice_input)
+            if num_dice < 2:
+                raise ValueError('Dice count must be at least 2.')
+        except ValueError as e:
+            print(f'\n{e} Please try again.\n')
             continue
-        num_dice = int(dice_input)
-        if num_dice < 2:
-            print('\nDice count must be at least 2. Please try again.\n')
-            continue
+
         mode_input = input('Choose a mode (Classic/Lucky/Risk): ').lower()
-        if mode_input not in modes:
-            print('\nInvalid mode. Please select a valid mode.\n')
+        try:
+            if mode_input not in modes:
+                raise ValueError("Invalid mode selected.")
+        except ValueError as e:
+            print(f'\n{e} Please choose from Classic, Lucky, or Risk.\n')
             continue
 
         dice_rolls = [random.randint(1, 6) for _ in range(num_dice)]
         total = sum(dice_rolls)
         roll_count += 1
         total_roll_value += total
-        if total > highest_roll:
-            highest_roll = total
+        highest_roll = max(highest_roll, total)
         if lowest_roll == 0 or total < lowest_roll:
             lowest_roll = total
         if len(set(dice_rolls)) == 1:
@@ -53,6 +59,7 @@ while True:
         rolled_numbers = ", ".join(map(str, dice_rolls))
 
         has_doubles = len(set(dice_rolls)) == 1
+
         if mode_input == "classic":
             if total > 10:
                 print(
@@ -67,14 +74,17 @@ while True:
                     f'\nYou rolled: {rolled_numbers} (Sorry, you lose!)')
                 player_points -= 3  # Deduct points for losing
                 print(f'Your current points: {player_points}\n')
+
             print(f'Total score: {total}')
             print(f'You have rolled the dice {roll_count} times. \n')
+
             if roll_count > 0:
                 average_roll = total_roll_value / roll_count
                 print(f'Average roll value: {average_roll:.2f}')
                 print(f'Total doubles rolled: {total_doubles}')
                 print(f'Highest roll: {highest_roll}')
                 print(f'Lowest roll: {lowest_roll}\n')
+
         if mode_input == "lucky":
             if has_doubles:
                 print(
@@ -82,7 +92,7 @@ while True:
                 player_points += 10  # Award points for doubles
                 print(f'Your current points: {player_points}\n')
                 continue  # Allow the player to roll again immediately
-            elif total > 10:
+            if total > 10:
                 print(
                     f'\nYou rolled: {rolled_numbers} (Congratulations! You win!)')
                 player_points += 5  # Award points for winning
@@ -95,14 +105,17 @@ while True:
                     f'\nYou rolled: {rolled_numbers} (Sorry, you lose!)')
                 player_points -= 3  # Deduct points for losing
                 print(f'Your current points: {player_points}\n')
+
             print(f'Total score: {total}')
             print(f'You have rolled the dice {roll_count} times. \n')
+
             if roll_count > 0:
                 average_roll = total_roll_value / roll_count
                 print(f'Average roll value: {average_roll:.2f}')
                 print(f'Total doubles rolled: {total_doubles}')
                 print(f'Highest roll: {highest_roll}')
                 print(f'Lowest roll: {lowest_roll}\n')
+
         if mode_input == "risk":
             if total < 7:
                 print(
@@ -117,14 +130,17 @@ while True:
             else:
                 print(
                     f'\nYou rolled: {rolled_numbers} (It\'s a draw! Try again!)')
+
             print(f'Total score: {total}')
             print(f'You have rolled the dice {roll_count} times. \n')
+
             if roll_count > 0:
                 average_roll = total_roll_value / roll_count
                 print(f'Average roll value: {average_roll:.2f}')
                 print(f'Total doubles rolled: {total_doubles}')
                 print(f'Highest roll: {highest_roll}')
                 print(f'Lowest roll: {lowest_roll}\n')
+
     elif user_input == 'n':
         print('\nThank you for playing! Goodbye!')
         break
