@@ -12,7 +12,7 @@ def test_initial_state():
 
 def test_update_increments_roll_count_and_total():
     stats = Stats()
-    stats.update(total=7, has_match=False)
+    stats.update(total=7, has_match=False, count_roll=True)
 
     assert stats.roll_count == 1
     assert stats.total_roll_value == 7
@@ -21,9 +21,9 @@ def test_update_increments_roll_count_and_total():
 def test_update_tracks_highest_and_lowest():
     stats = Stats()
 
-    stats.update(7, False)
-    stats.update(12, False)
-    stats.update(5, False)
+    stats.update(total=7, has_match=False, count_roll=True)
+    stats.update(total=12, has_match=False, count_roll=True)
+    stats.update(total=5, has_match=False, count_roll=True)
 
     assert stats.highest_roll == 12
     assert stats.lowest_roll == 5
@@ -32,9 +32,9 @@ def test_update_tracks_highest_and_lowest():
 def test_update_tracks_doubles():
     stats = Stats()
 
-    stats.update(8, False)
-    stats.update(6, True)
-    stats.update(10, True)
+    stats.update(total=8, has_match=False, count_roll=True)
+    stats.update(total=6, has_match=True, count_roll=True)
+    stats.update(total=10, has_match=True, count_roll=True)
 
     assert stats.total_doubles == 2
 
@@ -46,8 +46,8 @@ def test_average_no_rolls():
 
 def test_average_correct_value():
     stats = Stats()
-    stats.update(10, False)
-    stats.update(20, False)
+    stats.update(total=10, has_match=False, count_roll=True)
+    stats.update(total=20, has_match=False, count_roll=True)
 
     assert stats.average() == 15.0
 
@@ -61,8 +61,8 @@ def test_summary_no_rolls():
 
 def test_summary_after_updates():
     stats = Stats()
-    stats.update(10, False)
-    stats.update(20, True)
+    stats.update(total=10, has_match=False, count_roll=True)
+    stats.update(total=20, has_match=True, count_roll=True)
 
     lines = stats.summary_lines()
 
