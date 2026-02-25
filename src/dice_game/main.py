@@ -45,19 +45,19 @@ def print_turn_outcome(turn: TurnDisplay) -> bool:
 
     if turn.mode == "lucky" and turn.has_match:
         print(
-            f"\nYou rolled: {rolled_numbers} (Doubles! You get an extra turn!)")
+            f"\n🎲 You rolled: {rolled_numbers} (Doubles! You get an extra turn!)")
         return True
 
     out = DiceGameRules().outcome_from_total(turn.total)
 
     if turn.mode == "risk" and turn.total < 7:
-        print(f"\nYou rolled: {rolled_numbers} (Risky! You lose points!)")
+        print(f"\n🎲 You rolled: {rolled_numbers} (Risky! You lose points!)")
     elif out == "win":
-        print(f"\nYou rolled: {rolled_numbers} (Congratulations! You win!)")
+        print(f"\n🎲 You rolled: {rolled_numbers} (Congratulations! You win!)")
     elif out == "draw":
-        print(f"\nYou rolled: {rolled_numbers} (It's a draw! Try again!)")
+        print(f"\n🎲 You rolled: {rolled_numbers} (It's a draw! Try again!)")
     else:
-        print(f"\nYou rolled: {rolled_numbers} (Sorry, you lose!)")
+        print(f"\n🎲 You rolled: {rolled_numbers} (Sorry, you lose!)")
 
     return False
 
@@ -90,15 +90,16 @@ class DiceGame:
         self.min_dice = min_dice
         self.stats = stats if stats is not None else Stats()
         self.player_points = 0
+        self.has_match = False
 
     def print_progress(self) -> None:
-        for line in self.stats.summary_lines():
+        for line in self.stats.summary_lines(hide_roll_count=self.has_match):
             print(line)
         print(f"Current points: {self.player_points}\n")
 
     def print_goodbye(self) -> None:
         print("\nThank you for playing! Goodbye!\n")
-        for line in self.stats.summary_lines():
+        for line in self.stats.summary_lines(hide_roll_count=self.has_match):
             print(line)
         print(f"Final points: {self.player_points}\n")
 
@@ -112,11 +113,12 @@ class DiceGame:
         rolls = dice.roll_dice(num_dice)
         total = sum(rolls)
         has_match = dice.all_match(rolls)
+        self.has_match = has_match
 
         delta = DiceGameRules().apply_points(mode, total, has_match)
         self.player_points += delta
 
-        self.stats.update(total, has_match)
+        self.stats.update(total, count_roll=not has_match, has_match=has_match)
 
         turn = TurnDisplay(
             mode=mode,
