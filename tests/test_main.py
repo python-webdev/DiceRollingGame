@@ -68,11 +68,11 @@ class DummyStats(Stats):
         super().__init__()
         self.calls: list[tuple[int, bool]] = []
 
-    def update(self, total, has_match):
-        super().update(total, has_match)
+    def update(self, total: int, *, count_roll: bool = True, has_match: bool = False) -> None:
+        super().update(total, count_roll=not has_match, has_match=has_match)
         self.calls.append((total, has_match))
 
-    def summary_lines(self):
+    def summary_lines(self, *, hide_roll_count: bool = False) -> list[str]:
         return ["Turns: 1"]
 
 
