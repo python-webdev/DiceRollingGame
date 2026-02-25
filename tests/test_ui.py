@@ -1,91 +1,122 @@
-from dice_game.ui import ask_yes_no, ask_int, choose_mode, choose_dice_sides, format_rolls
+import builtins
+
+from dice_game.ui import GameUI
 
 
-def test_ask_yes_no_valid_inputs(monkeypatch):
-    inputs = iter(["y", "n"])
-    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
-
-    assert ask_yes_no("Roll the dice? (y/n): ") == "y"
-    assert ask_yes_no("Roll the dice? (y/n): ") == "n"
+def _patch_inputs(monkeypatch, values):
+    it = iter(values)
+    monkeypatch.setattr(builtins, "input", lambda _: next(it))
 
 
-def test_ask_yes_no_invalid_then_valid(monkeypatch):
-    inputs = iter(["maybe", "y"])
-    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
+# ---------------- ask_yes_no ----------------
 
-    assert ask_yes_no("Roll the dice? (y/n): ") == "y"
-
-
-def test_ask_int_valid_inputs(monkeypatch):
-    inputs = iter(["5", "10"])
-    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
-
-    assert ask_int("Enter a number: ") == 5
-    assert ask_int("Enter a number: ") == 10
+def test_ask_yes_no_accepts_y(monkeypatch):
+    _patch_inputs(monkeypatch, ["y"])
+    assert GameUI.ask_yes_no("Roll? ") == "y"
 
 
-def test_ask_int_invalid_then_valid(monkeypatch, capsys):
-    inputs = iter(["abc", "5"])
-    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
-
-    result = ask_int("Enter a number: ")
-    captured = capsys.readouterr()
-    assert "Invalid input" in captured.out
-    assert result == 5
+def test_ask_yes_no_accepts_n(monkeypatch):
+    _patch_inputs(monkeypatch, ["n"])
+    assert GameUI.ask_yes_no("Roll? ") == "n"
 
 
-def test_ask_int_below_min_then_valid(monkeypatch, capsys):
-    inputs = iter(["1", "5"])
-    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
+def test_ask_yes_no_reprompts_on_invalid_then_accepts(monkeypatch, capsys):
+    _patch_inputs(monkeypatch, ["maybe", "Y"])  # should lower() to "y"
+    assert GameUI.ask_yes_no("Roll? ") == "y"
 
-    result = ask_int("Enter a number: ", min_value=2)
-    captured = capsys.readouterr()
-    assert "Value must be at least 2" in captured.out
-    assert result == 5
+    out = capsys.readouterr().out
+    assert "Invalid input" in out
 
 
-def test_choose_mode_valid_inputs(monkeypatch):
-    inputs = iter(["Classic", "Lucky", "Risk"])
-    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
+# ---------------- ask_int ----------------
 
-    assert choose_mode() == "classic"
-    assert choose_mode() == "lucky"
-    assert choose_mode() == "risk"
+def test_ask_int_parses_int(monkeypatch):
+    _patch_inputs(monkeypatch, ["42"])
+    assert GameUI.ask_int("How many? ") == 42
 
 
-def test_choose_mode_invalid_then_valid(monkeypatch, capsys):
-    inputs = iter(["InvalidMode", "Classic"])
-    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
+def test_ask_int_reprompts_on_non_number(monkeypatch, capsys):
+    _patch_inputs(monkeypatch, ["abc", "5"])
+    assert GameUI.ask_int("How many? ") == 5
 
-    result = choose_mode()
-    captured = capsys.readouterr()
-    assert "Invalid mode" in captured.out
-    assert result == "classic"
+    out = capsys.readouterr().out
+    assert "Invalid input. Please enter a valid number." in out
 
 
-def test_choose_dice_sides_valid_inputs(monkeypatch):
-    inputs = iter(["D4", "D6", "D8", "D10", "D12", "D20"])
-    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
+def test_ask_int_enforces_min_value(monkeypatch, capsys):
+    _patch_inputs(monkeypatch, ["1", "2"])
+    assert GameUI.ask_int("How many? ", min_value=2) == 2
 
-    assert choose_dice_sides() == 4
-    assert choose_dice_sides() == 6
-    assert choose_dice_sides() == 8
-    assert choose_dice_sides() == 10
-    assert choose_dice_sides() == 12
-    assert choose_dice_sides() == 20
+    out = capsys.readouterr().out
+    assert "Dice count must be at least 2" in out
 
 
-def test_choose_dice_sides_invalid_then_valid(monkeypatch, capsys):
-    inputs = iter(["InvalidDice", "D6"])
-    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
+# ---------------- choose_mode ----------------
 
-    result = choose_dice_sides()
-    captured = capsys.readouterr()
-    assert "Invalid dice type" in captured.out
-    assert result == 6
+def test_choose_mode_accepts_valid(monkeypatch):
+    _patch_inputs(monkeypatch, ["classic"])
+    assert GameUI.choose_mode() == "classic"
 
+
+def test_choose_mode_reprompts_on_invalid(monkeypatch, capsys):
+    _patch_inputs(monkeypatch, ["wrong", "Lucky"])  # Lucky -> "lucky"
+    assert GameUI.choose_mode() == "lucky"
+
+    out = capsys.readouterr().out
+    assert "Invalid mode" in out
+
+
+# ---------------- choose_dice_sides ----------------
+
+def test_choose_dice_sides_accepts_valid(monkeypatch):
+    _patch_inputs(monkeypatch, ["D6"])
+    assert GameUI.choose_dice_sides() == 6
+
+
+def test_choose_dice_sides_accepts_lowercase(monkeypatch):
+    _patch_inputs(monkeypatch, ["d20"])
+    assert GameUI.choose_dice_sides() == 20
+
+
+def test_choose_dice_sides_reprompts_on_invalid(monkeypatch, capsys):
+    _patch_inputs(monkeypatch, ["D100", "D4"])
+    assert GameUI.choose_dice_sides() == 4
+
+    out = capsys.readouterr().out
+    assert "Invalid dice type" in out
+
+
+# ---------------- format_rolls ----------------
 
 def test_format_rolls():
-    rolls = [3, 5, 2]
-    formatted = format_rolls(rolls)
-    assert formatted == "3, 5, 2"
+    assert GameUI.format_rolls([1, 2, 10]) == "1, 2, 10"
+
+
+# ---------------- wrapper functions forward correctly ----------------
+
+def test_wrapper_ask_yes_no_calls_class(monkeypatch):
+    monkeypatch.setattr(GameUI, "ask_yes_no",
+                        staticmethod(lambda prompt: "y"))
+    assert GameUI.ask_yes_no("x") == "y"
+
+
+def test_wrapper_ask_int_calls_class(monkeypatch):
+    monkeypatch.setattr(GameUI, "ask_int", staticmethod(
+        lambda prompt, min_value=None: 3))
+    assert GameUI.ask_int("x", min_value=2) == 3
+
+
+def test_wrapper_choose_mode_calls_class(monkeypatch):
+    monkeypatch.setattr(GameUI, "choose_mode", staticmethod(lambda: "risk"))
+    assert GameUI.choose_mode() == "risk"
+
+
+def test_wrapper_choose_dice_sides_calls_class(monkeypatch):
+    monkeypatch.setattr(GameUI, "choose_dice_sides", staticmethod(lambda: 8))
+    assert GameUI.choose_dice_sides() == 8
+
+
+def test_wrapper_format_rolls_calls_class(monkeypatch):
+    monkeypatch.setattr(GameUI, "format_rolls",
+                        staticmethod(lambda rolls: "X"))
+    assert GameUI.format_rolls([1, 2]) == "X"

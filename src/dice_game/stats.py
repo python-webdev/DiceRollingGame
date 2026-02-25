@@ -7,13 +7,14 @@ class Stats:
     total_doubles: int = 0
     total_roll_value: int = 0
     highest_roll: int = 0
-    lowest_roll: int = 10**9  # big number so min() works from first roll
+    lowest_roll: int | None = None
 
     def update(self, total: int, has_match: bool) -> None:
         self.roll_count += 1
         self.total_roll_value += total
         self.highest_roll = max(self.highest_roll, total)
-        self.lowest_roll = min(self.lowest_roll, total)
+        self.lowest_roll = total if self.lowest_roll is None else min(
+            self.lowest_roll, total)
         if has_match:
             self.total_doubles += 1
 
@@ -28,5 +29,5 @@ class Stats:
             f"Average roll value: {self.average():.2f}",
             f"Total doubles rolled: {self.total_doubles}",
             f"Highest roll: {self.highest_roll}",
-            f"Lowest roll: {self.lowest_roll}",
+            f"Lowest roll: {self.lowest_roll if self.lowest_roll is not None else 'Not a number'}",
         ]
