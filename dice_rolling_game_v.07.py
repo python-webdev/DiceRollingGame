@@ -1,6 +1,6 @@
 import random
 
-dice_types = {
+DICE_TYPES = {
     "D4": 4,
     "D6": 6,
     "D8": 8,
@@ -8,8 +8,8 @@ dice_types = {
     "D12": 12,
     "D20": 20
 }
-game_modes = {"classic", "lucky", "risk"}
-min_dice = 2
+GAME_MODES = {"classic", "lucky", "risk"}
+MIN_DICE = 2
 
 
 def ask_yes_no(prompt: str) -> str:
@@ -40,7 +40,7 @@ def ask_int(prompt: str, *, min_value: int | None = None) -> int:
 def choose_mode() -> str:
     while True:
         mode = input("Choose a mode (Classic/Lucky/Risk): ").strip().lower()
-        if mode in game_modes:
+        if mode in GAME_MODES:
             return mode
         print("\nInvalid mode. Please select a valid mode.\n")
 
@@ -49,8 +49,8 @@ def choose_dice_sides() -> int:
     prompt = "Choose a dice type (D4, D6, D8, D10, D12, D20): "
     while True:
         dice_type = input(prompt).strip().upper()
-        if dice_type in dice_types:
-            return dice_types[dice_type]
+        if dice_type in DICE_TYPES:
+            return DICE_TYPES[dice_type]
         print("\nInvalid dice type. Please select a valid dice type.\n")
 
 
@@ -71,8 +71,8 @@ def outcome_from_total(total: int, num_dice: int, sides: int) -> str:
     """
     max_total = num_dice * sides
     # ceil without importing math
-    win_cutoff = int(max_total * 0.75 + 0.999999)
-    draw_cutoff = int(max_total * 0.60 + 0.999999)  # ceil
+    win_cutoff = (max_total * 75 + 99) // 100
+    draw_cutoff = (max_total * 60 + 99) // 100  # ceil
 
     if total >= win_cutoff:
         return "win"
@@ -97,7 +97,7 @@ def apply_points(mode: str, total: int, has_match: bool, num_dice: int, sides: i
       if total < 35% of max => -3 (risk penalty)
     """
     max_total = num_dice * sides
-    risk_cutoff = int(max_total * 0.35)  # floor is fine for penalty threshold
+    risk_cutoff = (max_total * 35) // 100  # floor is fine for penalty threshold
 
     # Lucky bonus overrides normal scoring
     if mode == "lucky" and has_match:
@@ -117,7 +117,7 @@ def apply_points(mode: str, total: int, has_match: bool, num_dice: int, sides: i
 
 def get_outcome_message(mode: str, total: int, has_match: bool, num_dice: int, sides: int) -> str:
     max_total = num_dice * sides
-    risk_cutoff = int(max_total * 0.35)
+    risk_cutoff = (max_total * 35) // 100
 
     if mode == "lucky" and has_match:
         return "(All dice match! +10 points and extra turn!)"
@@ -147,27 +147,37 @@ def print_turn_result(rolls: list[int], total: int, points_delta: int, points_to
     print(f"Total score: {total}")
 
 
-def update_stats(stats: dict, total: int, has_match: bool) -> None:
+def update_stats(stats: dict, total: int, has_match: bool = False, count_roll: bool = True) -> None:
+    if has_match:
+        stats["total_doubles"] += 1
+
+    if not count_roll:
+        return
     stats["roll_count"] += 1
     stats["total_roll_value"] += total
     stats["highest_roll"] = max(stats["highest_roll"], total)
     stats["lowest_roll"] = min(stats["lowest_roll"], total)
-    if has_match:
-        stats["total_doubles"] += 1
 
 
-def print_stats(stats: dict) -> None:
-    rc = stats["roll_count"]
-    if rc == 0:
+def print_stats(stats: dict, *, hide_roll_count: bool = False) -> None:
+    roll_count = stats["roll_count"]
+    if roll_count == 0:
+        print("No rolls yet.\n")
         return
 
-    average = stats["total_roll_value"] / rc
-    print(f"You have rolled the dice {rc} times.\n")
-    print(f"Average roll value: {average:.2f}")
-    print(f"Total doubles rolled: {stats['total_doubles']}")
-    print(f"Highest roll: {stats['highest_roll']}")
-    print(f"Lowest roll: {stats['lowest_roll']}")
-    print(f"Player points: {stats['player_points']}\n")
+    lowest = stats['lowest_roll'] if stats['lowest_roll'] != float('inf') else 0
+    lines = []
+    if not hide_roll_count:
+        lines.append(f"\nYou have rolled the dice {roll_count} times.")
+
+    lines.extend([
+        f"\nAverage roll value: {stats['total_roll_value'] / roll_count:.2f}",
+        f"Total doubles rolled: {stats['total_doubles']}",
+        f"Highest roll: {stats['highest_roll']}",
+        f"Lowest roll: {lowest}",
+        f"Player points: {stats['player_points']}",
+    ])
+    print("\n".join(lines) + "\n")
 
 
 def main() -> None:
@@ -182,6 +192,7 @@ def main() -> None:
     }
 
     while True:
+        print('--- Welcome to the Dice Rolling Game! ---')
         user_input = ask_yes_no("Roll the dice? (y/n): ")
         if user_input == "n":
             print("\nThank you for playing! Goodbye!")
@@ -190,13 +201,15 @@ def main() -> None:
             break
 
         num_dice = ask_int(
-            "How many dice would you like to roll? ", min_value=min_dice)
+            "How many dice would you like to roll? ", min_value=MIN_DICE)
         mode = choose_mode()
         sides = choose_dice_sides()
 
         rolls = roll_dice(num_dice, sides)
         total = sum(rolls)
         has_match = all_match(rolls)
+        # if all match, it's a special case that may not count as a normal roll for stats
+        count_roll = not has_match
 
         # points
         delta = apply_points(mode, total, has_match, num_dice, sides)
@@ -205,11 +218,12 @@ def main() -> None:
 
         # lucky doubles => extra turn, but still counts as a completed roll in your current design
         # If you want it NOT to count, move update_stats below the "continue".
-        update_stats(stats, total, has_match)
+        update_stats(stats, total, has_match, count_roll=count_roll)
 
         msg = get_outcome_message(mode, total, has_match, num_dice, sides)
         print_turn_result(rolls, total, delta, player_points, msg)
-        print_stats(stats)
+        # hide roll count if they got doubles for extra turn
+        print_stats(stats, hide_roll_count=has_match)
 
         # Lucky mode: doubles => extra turn immediately
         if mode == "lucky" and has_match:
