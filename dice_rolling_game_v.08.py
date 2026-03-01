@@ -1,5 +1,5 @@
 import random
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Final
 from enum import Enum, auto
 
@@ -14,7 +14,6 @@ DICE_TYPES: Final[dict[str, int]] = {
     "D20": 20,
 }
 
-GAME_MODES: Final[set[str]] = {"classic", "lucky", "risk"}
 MIN_DICE: Final[int] = 2
 
 
@@ -37,8 +36,8 @@ class ThresholdConfig:
 
 @dataclass(frozen=True)
 class GameConfig:
-    points: PointsConfig = PointsConfig()
-    thresholds: ThresholdConfig = ThresholdConfig()
+    points: PointsConfig = field(default_factory=PointsConfig)
+    thresholds: ThresholdConfig = field(default_factory=ThresholdConfig)
 
 
 # ---------- Game Modes ----------
@@ -253,7 +252,8 @@ def print_stats(stats: Stats, points_total: int) -> None:
         f"Lowest total: {lowest}",
         "----------------",
     ]
-    print(f"{'\n'.join(lines)}\n")
+    print("\n".join(lines))
+    print()
 
 
 # ---------- Main ----------
