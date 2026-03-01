@@ -55,18 +55,16 @@ class Stats:
     total_matches: int = 0  # "all dice match"
     total_roll_value: int = 0
     highest_total: int = 0
-    lowest_total: int = 10**9  # sentinel
+    lowest_total: int | None = None
 
-    def update(self, total: int, has_match: bool = False, count_roll: bool = True) -> None:
-        if has_match:
-            self.total_matches += 1
-
-        if not count_roll:
-            return
+    def update(self, total: int, has_match: bool = False) -> None:
         self.roll_count += 1
         self.total_roll_value += total
         self.highest_total = max(self.highest_total, total)
-        self.lowest_total = min(self.lowest_total, total)
+        self.lowest_total = total if self.lowest_total is None else min(
+            self.lowest_total, total)
+        if has_match:
+            self.total_matches += 1
 
     @property
     def average_total(self) -> float:
@@ -119,7 +117,21 @@ class RollResult:
         return (self.total - min_possible) / (max_possible - min_possible)
 
 
+@dataclass
+class TurnState:
+    game_config: GameConfig
+    stats: Stats
+    player_points: int = 0
+
+
+@dataclass(frozen=True)
+class TurnOutcome:
+    result: RollResult
+    extra_turn: bool
+
 # ---------- Input helpers ----------
+
+
 def ask_yes_no(prompt: str) -> str:
     while True:
         ans = input(prompt).strip().lower()
@@ -128,7 +140,7 @@ def ask_yes_no(prompt: str) -> str:
         print("\nInvalid input. Please enter 'y' or 'n'.\n")
 
 
-def ask_int(prompt: str, min_value: int | None = None) -> int:
+def ask_int(prompt: str, *, min_value: int | None = None) -> int:
     while True:
         raw = input(prompt).strip()
         try:
@@ -148,9 +160,10 @@ def ask_int(prompt: str, min_value: int | None = None) -> int:
 def choose_mode() -> GameMode:
     while True:
         mode = input("Choose a mode (Classic/Lucky/Risk): ").strip().lower()
-        if mode in GAME_MODES:
+        try:
             return GameMode[mode.upper()]
-        print("\nInvalid mode. Please select a valid mode.\n")
+        except KeyError:
+            print("\nInvalid mode. Please select a valid mode.\n")
 
 
 def choose_dice_type() -> str:
@@ -224,84 +237,118 @@ def print_turn_result(result: RollResult) -> None:
     print(f"Total points: {result.points_total}\n")
 
 
-def print_stats(stats: Stats, points_total: int, hide_roll_count: bool = False) -> None:
+def print_stats(stats: Stats, points_total: int) -> None:
     if stats.roll_count == 0:
         print("No rolls yet.\n")
         return
-    lines = []
-    if not hide_roll_count:
-        lines.append(f"You have rolled the dice {stats.roll_count} times.\n")
 
-    lines.extend([
+    lowest = stats.lowest_total if stats.lowest_total is not None else "-"
+    lines = [
         "---- Stats ----",
         f"Completed rolls: {stats.roll_count}",
         f"Total points: {points_total}",
         f"Average total: {stats.average_total:.2f}",
         f"Total matches: {stats.total_matches}",
         f"Highest total: {stats.highest_total}",
-        f"Lowest total: {stats.lowest_total}",
-        '----------------',
-    ])
+        f"Lowest total: {lowest}",
+        "----------------",
+    ]
     print(f"{'\n'.join(lines)}\n")
 
 
 # ---------- Main ----------
+def get_roll_context() -> RollContext:
+    num_dice = ask_int(
+        "How many dice would you like to roll? ", min_value=MIN_DICE)
+    mode = choose_mode()
+    dice_type = choose_dice_type()
+    sides = DICE_TYPES[dice_type]
+    return RollContext(mode=mode, dice_type=dice_type, num_dice=num_dice, sides=sides)
+
+
+def build_temp_result(context: RollContext, rolls: list[int], player_points: int) -> RollResult:
+    return RollResult(
+        context=context,
+        rolls=rolls,
+        outcome="",
+        points_delta=0,
+        points_total=player_points,
+    )
+
+
+def resolve_turn(game_config: GameConfig, temp_result: RollResult) -> tuple[str, int]:
+    outcome = determine_outcome(game_config, temp_result)
+    delta = points_for_turn(game_config, temp_result)
+    return outcome, delta
+
+
+def apply_turn_effects(
+        state: TurnState,
+        temp_result: RollResult,
+        delta: int,
+) -> bool:
+    """
+    Mutates state (points + stats)
+    and returns extra_turn (bool)
+    """
+    extra_turn = temp_result.is_lucky_match
+
+    state.player_points += delta
+    state.stats.update(
+        temp_result.total,
+        temp_result.has_match,
+    )
+    return extra_turn
+
+
+def finalize_result(
+    temp_result: RollResult,
+    outcome: str,
+    delta: int,
+    player_points: int,
+) -> RollResult:
+    return RollResult(
+        context=temp_result.context,
+        rolls=temp_result.rolls,
+        outcome=outcome,
+        points_delta=delta,
+        points_total=player_points,
+    )
+
+
+def play_turn(
+    state: TurnState,
+) -> TurnOutcome:
+    context = get_roll_context()
+    rolls = roll_dice(context)
+
+    temp_result = build_temp_result(context, rolls, state.player_points)
+    outcome, delta = resolve_turn(state.game_config, temp_result)
+
+    extra_turn = apply_turn_effects(state, temp_result, delta)
+    result = finalize_result(temp_result, outcome, delta, state.player_points)
+
+    return TurnOutcome(result=result, extra_turn=extra_turn)
+
+
 def main() -> None:
-    game_config = GameConfig()
-    stats = Stats()
-    player_points = 0
+    state = TurnState(game_config=GameConfig(), stats=Stats(), player_points=0)
 
     print("--- Welcome to the Dice Rolling Game! ---")
 
     while True:
-        user_input = ask_yes_no("Roll the dice? (y/n): ")
-        if user_input == "n":
+        if ask_yes_no("Roll the dice? (y/n): ") == "n":
             print("\nThank you for playing! Goodbye!\n")
-            print_stats(stats, player_points)
+            print_stats(state.stats, state.player_points)
             break
 
-        num_dice = ask_int(
-            "How many dice would you like to roll? ", min_value=MIN_DICE)
-        mode = choose_mode()
-        dice_type = choose_dice_type()
-        sides = DICE_TYPES[dice_type]
+        outcome = play_turn(state)
 
-        context = RollContext(mode=mode, dice_type=dice_type,
-                              num_dice=num_dice, sides=sides)
-        rolls = roll_dice(context)
-        # total = sum(rolls)
-        temp_result = RollResult(
-            context=context,
-            rolls=rolls,
-            outcome="",
-            points_delta=0,
-            points_total=player_points,
-        )
-        has_match = temp_result.has_match
-        count_roll = not (mode == GameMode.LUCKY and has_match)
+        print_turn_result(outcome.result)
+        print_stats(state.stats, state.player_points)
 
-        outcome = determine_outcome(game_config, temp_result)
-        delta = points_for_turn(game_config, temp_result)
-        player_points += delta
-
-        stats.update(temp_result.total, has_match, count_roll=count_roll)
-
-        result = RollResult(
-            context=context,
-            rolls=rolls,
-            outcome=outcome,
-            points_delta=delta,
-            points_total=player_points,
-        )
-
-        print_turn_result(result)
-        print_stats(stats, player_points, hide_roll_count=(
-            mode == GameMode.LUCKY and has_match))
-
-        # Lucky mode: if all dice match => immediate extra turn
-        if mode == GameMode.LUCKY and has_match:
+        if outcome.extra_turn:
             print("🍀 Lucky mode match! Extra turn!\n")
-            continue
 
 
 if __name__ == "__main__":
