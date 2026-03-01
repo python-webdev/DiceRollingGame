@@ -233,8 +233,6 @@ def print_turn_result(result: RollResult) -> None:
     else:
         print("Points: 0")
 
-    print(f"Total points: {result.points_total}\n")
-
 
 def print_stats(stats: Stats, points_total: int) -> None:
     if stats.roll_count == 0:
@@ -243,7 +241,7 @@ def print_stats(stats: Stats, points_total: int) -> None:
 
     lowest = stats.lowest_total if stats.lowest_total is not None else "-"
     lines = [
-        "---- Stats ----",
+        "\n---- Stats ----",
         f"Completed rolls: {stats.roll_count}",
         f"Total points: {points_total}",
         f"Average total: {stats.average_total:.2f}",
@@ -342,9 +340,9 @@ def main() -> None:
             print_stats(state.stats, state.player_points)
             break
 
-        outcome = play_turn(state)
-
         while True:
+            outcome = play_turn(state)
+
             print_turn_result(outcome.result)
             print_stats(state.stats, state.player_points)
 
@@ -352,7 +350,6 @@ def main() -> None:
                 break
 
             print("🍀 Lucky mode match! Extra turn! 🎉 🎊\n")
-            outcome = play_turn(state)
 
 
 if __name__ == "__main__":
