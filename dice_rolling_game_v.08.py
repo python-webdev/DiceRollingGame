@@ -220,9 +220,9 @@ def print_turn_result(result: RollResult) -> None:
 
     if result.has_match:
         label = "DOUBLES" if result.context.num_dice == 2 else "ALL MATCH"
-        print(f"Match: {label} ✅")
+        print(f"Match: {label} 🏆")
     else:
-        print("Match: no")
+        print("Match: No")
 
     print(f"Outcome: {result.outcome.upper()}")
 
