@@ -344,11 +344,15 @@ def main() -> None:
 
         outcome = play_turn(state)
 
-        print_turn_result(outcome.result)
-        print_stats(state.stats, state.player_points)
+        while True:
+            print_turn_result(outcome.result)
+            print_stats(state.stats, state.player_points)
 
-        if outcome.extra_turn:
-            print("🍀 Lucky mode match! Extra turn!\n")
+            if not outcome.extra_turn:
+                break
+
+            print("🍀 Lucky mode match! Extra turn! 🎉 🎊\n")
+            outcome = play_turn(state)
 
 
 if __name__ == "__main__":
