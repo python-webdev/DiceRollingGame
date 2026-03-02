@@ -49,7 +49,9 @@ def update_stats(stats: dict, total: int, has_match: bool = False) -> None:
     stats["total_roll_value"] += total
     stats["highest_total"] = max(stats["highest_total"], total)
     stats["lowest_total"] = total if stats["lowest_total"] is None else min(
-        stats["lowest_total"], total)
+        stats["lowest_total"],
+        total
+    )
     if has_match:
         stats["total_matches"] += 1
 
@@ -112,7 +114,6 @@ def make_roll_context(*, mode: str, dice_type: str, num_dice: int, sides: int) -
 
 
 def make_temp_result(context: dict, rolls: list[int], points_total: int) -> dict:
-    # outcome and points_delta filled later
     return {
         "context": context,
         "rolls": rolls,
@@ -190,18 +191,19 @@ def points_for_turn(game_config: dict, result: dict) -> int:
 
 # ---------- Printing ----------
 def print_turn_result(result: dict) -> None:
-    ctx = result["context"]
+    context_info = result["context"]
     rolls = result["rolls"]
     rolled_numbers = ", ".join(map(str, rolls))
 
-    t = total_of(result)
+    total_roll_value = total_of(result)
     match = has_match(result)
 
     print(f"\n🎲 You rolled: {rolled_numbers}")
-    print(f"Dice: {ctx['num_dice']} × {ctx['dice_type']} (Total: {t})")
+    print(
+        f"Dice: {context_info['num_dice']} × {context_info['dice_type']} (Total: {total_roll_value})")
 
     if match:
-        label = "DOUBLES" if ctx["num_dice"] == 2 else "ALL MATCH"
+        label = "DOUBLES" if context_info["num_dice"] == 2 else "ALL MATCH"
         print(f"Match: {label} 🏆")
     else:
         print("Match: No")
