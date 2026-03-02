@@ -128,9 +128,8 @@ class TurnOutcome:
     result: RollResult
     extra_turn: bool
 
+
 # ---------- Input helpers ----------
-
-
 def ask_yes_no(prompt: str) -> str:
     while True:
         ans = input(prompt).strip().lower()
