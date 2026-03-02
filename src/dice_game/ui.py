@@ -1,5 +1,11 @@
+from enum import Enum, auto
 from .dice import DICE_TYPES
-from .rules import modes
+
+
+class GameMode(Enum):
+    CLASSIC = auto()
+    LUCKY = auto()
+    RISK = auto()
 
 
 class GameUI:
@@ -29,20 +35,21 @@ class GameUI:
             return value
 
     @staticmethod
-    def choose_mode() -> str:
+    def choose_mode() -> GameMode:
         while True:
             mode = input("Choose a mode (Classic/Lucky/Risk): ").strip().lower()
-            if mode in modes:
-                return mode
-            print("\nInvalid mode. Please select Classic, Lucky, or Risk.\n")
+            try:
+                return GameMode[mode.upper()]
+            except KeyError:
+                print("\nInvalid mode. Please select a valid mode.\n")
 
     @staticmethod
-    def choose_dice_sides() -> int:
+    def choose_dice_sides() -> str:
         prompt = "Choose a dice type (D4, D6, D8, D10, D12, D20): "
         while True:
             dice_type = input(prompt).strip().upper()
             if dice_type in DICE_TYPES:
-                return DICE_TYPES[dice_type]
+                return dice_type
             print("\nInvalid dice type. Please select a valid dice type.\n")
 
     @staticmethod
@@ -58,11 +65,11 @@ def ask_int(prompt: str, *, min_value: int | None = None) -> int:
     return GameUI.ask_int(prompt, min_value=min_value)
 
 
-def choose_mode() -> str:
+def choose_mode() -> GameMode:
     return GameUI.choose_mode()
 
 
-def choose_dice_sides() -> int:
+def choose_dice_sides() -> str:
     return GameUI.choose_dice_sides()
 
 
