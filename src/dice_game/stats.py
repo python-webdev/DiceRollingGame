@@ -9,32 +9,37 @@ class Stats:
     highest_roll: int = 0
     lowest_roll: int | None = None
 
-    def update(self, total: int, *, count_roll: bool = True, has_match: bool = False) -> None:
-        if has_match:
-            self.total_doubles += 1
-
-        if not count_roll:
-            return
+    def update(self, total: int, has_match: bool = False) -> None:
 
         self.roll_count += 1
         self.total_roll_value += total
         self.highest_roll = max(self.highest_roll, total)
-        self.lowest_roll = (
-            total if self.lowest_roll is None else min(self.lowest_roll, total))
+        self.lowest_roll = total if self.lowest_roll is None else min(
+            self.lowest_roll,
+            total
+        )
+        if has_match:
+            self.total_doubles += 1
 
+    @property
     def average(self) -> float:
-        return (self.total_roll_value / self.roll_count) if self.roll_count else 0.0
+        return 0.0 if self.roll_count == 0 else self.total_roll_value / self.roll_count
 
-    def summary_lines(self, *, hide_roll_count: bool = False) -> list[str]:
+    def print_stats(self, points_total: int) -> None:
         if self.roll_count == 0:
-            return ["No rolls yet."]
-        lines = []
-        if not hide_roll_count:
-            lines.append(f"You have rolled the dice {self.roll_count} times.")
-        lines.extend([
-            f"Average roll value: {self.average():.2f}",
-            f"Total doubles rolled: {self.total_doubles}",
+            print("No rolls yet.\n")
+            return
+
+        lowest = self.lowest_roll if self.lowest_roll is not None else "-"
+        lines = [
+            "\n---- Stats ----",
+            f"Completed rolls: {self.roll_count}",
+            f"Total points: {points_total}",
+            f"Average total: {self.average:.2f}",
+            f"Total doubles: {self.total_doubles}",
             f"Highest roll: {self.highest_roll}",
-            f"Lowest roll: {self.lowest_roll if self.lowest_roll is not None else 'Not a number'}",
-        ])
-        return lines
+            f"Lowest roll: {lowest}",
+            "----------------",
+        ]
+        print("\n".join(lines))
+        print()
