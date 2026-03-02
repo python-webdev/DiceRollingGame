@@ -1,6 +1,6 @@
 import builtins
 
-from dice_game.ui import GameUI
+from dice_game.ui import GameUI, GameMode
 
 
 def _patch_inputs(monkeypatch, values):
@@ -55,12 +55,12 @@ def test_ask_int_enforces_min_value(monkeypatch, capsys):
 
 def test_choose_mode_accepts_valid(monkeypatch):
     _patch_inputs(monkeypatch, ["classic"])
-    assert GameUI.choose_mode() == "classic"
+    assert GameUI.choose_mode() == GameMode.CLASSIC
 
 
 def test_choose_mode_reprompts_on_invalid(monkeypatch, capsys):
     _patch_inputs(monkeypatch, ["wrong", "Lucky"])  # Lucky -> "lucky"
-    assert GameUI.choose_mode() == "lucky"
+    assert GameUI.choose_mode() == GameMode.LUCKY
 
     out = capsys.readouterr().out
     assert "Invalid mode" in out
@@ -70,17 +70,17 @@ def test_choose_mode_reprompts_on_invalid(monkeypatch, capsys):
 
 def test_choose_dice_sides_accepts_valid(monkeypatch):
     _patch_inputs(monkeypatch, ["D6"])
-    assert GameUI.choose_dice_sides() == 6
+    assert GameUI.choose_dice_sides() == "D6"
 
 
 def test_choose_dice_sides_accepts_lowercase(monkeypatch):
     _patch_inputs(monkeypatch, ["d20"])
-    assert GameUI.choose_dice_sides() == 20
+    assert GameUI.choose_dice_sides() == "D20"
 
 
 def test_choose_dice_sides_reprompts_on_invalid(monkeypatch, capsys):
     _patch_inputs(monkeypatch, ["D100", "D4"])
-    assert GameUI.choose_dice_sides() == 4
+    assert GameUI.choose_dice_sides() == "D4"
 
     out = capsys.readouterr().out
     assert "Invalid dice type" in out
@@ -107,13 +107,14 @@ def test_wrapper_ask_int_calls_class(monkeypatch):
 
 
 def test_wrapper_choose_mode_calls_class(monkeypatch):
-    monkeypatch.setattr(GameUI, "choose_mode", staticmethod(lambda: "risk"))
-    assert GameUI.choose_mode() == "risk"
+    monkeypatch.setattr(GameUI, "choose_mode",
+                        staticmethod(lambda: GameMode.RISK))
+    assert GameUI.choose_mode() == GameMode.RISK
 
 
 def test_wrapper_choose_dice_sides_calls_class(monkeypatch):
-    monkeypatch.setattr(GameUI, "choose_dice_sides", staticmethod(lambda: 8))
-    assert GameUI.choose_dice_sides() == 8
+    monkeypatch.setattr(GameUI, "choose_dice_sides", staticmethod(lambda: "D8"))
+    assert GameUI.choose_dice_sides() == "D8"
 
 
 def test_wrapper_format_rolls_calls_class(monkeypatch):
