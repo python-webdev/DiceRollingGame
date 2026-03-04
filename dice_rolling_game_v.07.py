@@ -69,7 +69,7 @@ def ask_yes_no(prompt: str) -> str:
         print("\nInvalid input. Please enter 'y' or 'n'.\n")
 
 
-def ask_int(prompt: str, *, min_value: int | None = None) -> int:
+def ask_int(prompt: str, min_value: int | None = None) -> int:
     while True:
         raw = input(prompt).strip()
         try:
@@ -223,6 +223,11 @@ def print_stats(stats: dict, points_total: int) -> None:
     if stats["roll_count"] == 0:
         print("No rolls yet.\n")
         return
+
+    lowest = stats['lowest_roll'] if stats['lowest_roll'] != float('inf') else 0
+    lines = []
+    if not hide_roll_count:
+        lines.append(f"You have rolled the dice {roll_count} times.\n")
 
     lowest = stats["lowest_total"] if stats["lowest_total"] is not None else "-"
     lines = [
