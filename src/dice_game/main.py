@@ -17,9 +17,9 @@ from .printing import (
     print_best_roll,
 )
 from .history import (
-    default_history_path,
+    history_path,
     load_history,
-    append_result,
+    append_history,
     last_n,
     filter_history,
     best_roll,
@@ -72,19 +72,19 @@ def run_history_menu(state: TurnState) -> None:
 
 
 def main() -> None:
-    history_path = default_history_path()
-    history = load_history(history_path)
+    path = history_path()
+    history = load_history(path)
 
     state = TurnState(
         game_config=GameConfig(),
         stats=Stats(),
         player_points=0,
-        history_path=history_path,
+        history_path=path,
         history=history,
     )
 
     print("--- Welcome to the Dice Rolling Game! ---")
-    print(f"History file: {history_path.resolve()}")
+    print(f"History file: {path.resolve()}")
     print(f"Loaded records: {len(state.history)}\n")
 
     while True:
@@ -108,7 +108,8 @@ def main() -> None:
             print_stats(state.stats, state.player_points)
 
             # SAVE (every roll)
-            append_result(state.history_path, state.history, outcome.result)
+            record = append_history(path, outcome.result)
+            state.history.append(record)
 
             if not outcome.extra_turn:
                 break

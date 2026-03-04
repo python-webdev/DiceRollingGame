@@ -1,86 +1,114 @@
-# src/dice_game/history.py
-from __future__ import annotations
-
 import json
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import TypedDict, cast
 
 from .models import RollResult
 
-
-def default_history_path() -> Path:
-    """
-    Save in project root when you run from root.
-    If you run elsewhere, it saves relative to your current working directory.
-    """
-    return Path("history.json")
+# Using TypedDict is the best practice for JSON structures.
+# It provides type safety and IDE autocompletion while remaining a plain dict.
 
 
-def load_history(path: Path) -> list[dict[str, Any]]:
+class HistoryRecord(TypedDict):
+    time: str
+    mode: str
+    dice: int
+    dice_type: str
+    sides: int
+    rolls: list[int]
+    total: int
+    match: bool
+    outcome: str
+    points_delta: int
+    points_total: int
+
+
+def history_path() -> Path:
+    """Returns the default path for the history file."""
+    return Path("history.jsonl")
+
+
+def load_history(path: Path) -> list[HistoryRecord]:
+    """Loads and parses the history from a JSONL file."""
     if not path.exists():
         return []
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-        if isinstance(data, list):
-            return [x for x in data if isinstance(x, dict)]
-    except json.JSONDecodeError:
-        pass
-    return []
+
+    records: list[HistoryRecord] = []
+
+    with path.open("r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                # cast is used because json.loads returns 'Any' by default
+                record = cast(HistoryRecord, json.loads(line))
+                records.append(record)
+            except json.JSONDecodeError:
+                continue
+
+    return records
 
 
-def save_history(path: Path, history: list[dict[str, Any]]) -> None:
-    path.write_text(json.dumps(history, indent=2), encoding="utf-8")
-
-
-def record_from_result(result: RollResult) -> dict[str, Any]:
-    # NOTE: we store minimal useful info + full context.
+def record_from_result(result: RollResult) -> HistoryRecord:
+    """Converts a RollResult into a HistoryRecord dictionary."""
     return {
         "time": datetime.now(timezone.utc).isoformat(),
         "mode": result.context.mode.name,
-        "dice_type": result.context.dice_type,
         "dice": result.context.num_dice,
+        "dice_type": result.context.dice_type,
         "sides": result.context.sides,
-        "rolls": list(result.rolls),
+        "rolls": result.rolls,
         "total": result.total,
-        "has_match": result.has_match,
+        "match": result.has_match,
         "outcome": result.outcome,
         "points_delta": result.points_delta,
         "points_total": result.points_total,
     }
 
 
-def append_result(path: Path, history: list[dict[str, Any]], result: RollResult) -> None:
-    history.append(record_from_result(result))
-    save_history(path, history)
+def append_history(path: Path, result: RollResult) -> HistoryRecord:
+    """Appends a new result to the history file and returns the record."""
+    record = record_from_result(result)
+
+    with path.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(record) + "\n")
+
+    return record
 
 
 # -------- queries --------
 
-def last_n(history: list[dict[str, Any]], n: int) -> list[dict[str, Any]]:
-    if n <= 0:
-        return []
+
+def last_n(history: list[HistoryRecord], n: int) -> list[HistoryRecord]:
+    """Returns the most recent n records."""
     return history[-n:]
 
 
 def filter_history(
-    history: list[dict[str, Any]],
+    history: list[HistoryRecord],
     *,
     sides: int | None = None,
     dice: int | None = None,
-) -> list[dict[str, Any]]:
-    out: list[dict[str, Any]] = []
+) -> list[HistoryRecord]:
+    """Filters the history by number of sides or number of dice."""
+    out: list[HistoryRecord] = []
+
     for r in history:
-        if sides is not None and r.get("sides") != sides:
+        if sides is not None and r["sides"] != sides:
             continue
-        if dice is not None and r.get("dice") != dice:
+
+        if dice is not None and r["dice"] != dice:
             continue
+
         out.append(r)
+
     return out
 
 
-def best_roll(history: list[dict[str, Any]]) -> dict[str, Any] | None:
+def best_roll(history: list[HistoryRecord]) -> HistoryRecord | None:
+    """Returns the record with the highest total value."""
     if not history:
         return None
-    # “best” = highest total (simple + clear)
-    return max(history, key=lambda r: int(r.get("total", 0)))
+
+    return max(history, key=lambda r: r["total"])
