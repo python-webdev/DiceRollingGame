@@ -1,4 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
 
 from .config import GameConfig
 from .modes import GameMode
@@ -54,6 +56,9 @@ class TurnState:
     game_config: GameConfig
     stats: Stats
     player_points: int = 0
+
+    history_path: Path | None = None
+    history: list[dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
