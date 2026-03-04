@@ -55,3 +55,17 @@ def get_roll_context():
     dice_type = choose_dice_type()
     sides = DICE_TYPES[dice_type]
     return RollContext(mode=mode, dice_type=dice_type, num_dice=num_dice, sides=sides)
+
+
+# -------- Menu Asking --------
+def ask_menu_action() -> str:
+    """
+    r = roll
+    h = history (last N / filter / best)
+    q = quit
+    """
+    while True:
+        ans = input("(r)oll, (h)istory, (q)uit: ").strip().lower()
+        if ans in ("r", "h", "q"):
+            return ans
+        print("\nInvalid choice. Enter r, h, or q.\n")
