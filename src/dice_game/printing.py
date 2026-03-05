@@ -76,44 +76,61 @@ def print_best_roll(record: HistoryRecord | None) -> None:
     print("------------------------\n")
 
 
-def print_simulation_report(report: SimulationReport, *, top_n_totals: int) -> None:
-    if report.trials == 0:
+def print_simulation_report(report: SimulationReport, *, top_n_totals: int = 10) -> None:
+    trials = report.config.trials
+    if trials == 0:
         print("\nSimulation: No trials were run, so no report to show.\n")
         return
 
-    win = report.counts.outcomes.get("win", 0)
-    draw = report.counts.outcomes.get("draw", 0)
-    lose = report.counts.outcomes.get("lose", 0)
+    win = report.counts.outcome_counts.get("win", 0)
+    draw = report.counts.outcome_counts.get("draw", 0)
+    lose = report.counts.outcome_counts.get("lose", 0)
 
     print("\n----- Simulation Report -----")
-    print(f"Trials: {report.trials}")
-    print(f"Dice: {report.dice} × D{report.sides}")
-    print(f"Match count: {report.match_count}")
+    print(f"Trials: {trials}")
+    print(f"Dice: {report.config.dice} × D{report.config.sides}")
+    print(f"Match count: {report.counts.match_count}")
     print(
-        f"Match probability: {report.match_probability:.4f} ({report.match_probability*100:.2f}%)")
-    print()
-    print("Outcomes:")
-    print(f"  WIN : {win} ({win/report.trials*100:.2f}%)")
-    print(f"  DRAW: {draw} ({draw/report.trials*100:.2f}%)")
-    print(f"  LOSE: {lose} ({lose/report.trials*100:.2f}%)")
-    print()
-    print(f"Average total: {report.avg_total:.2f}")
-    print(f"Average points delta: {report.avg_points_delta:.2f}")
+        f"Match probability: {report.match_probability:.4f} ({report.match_probability * 100:.2f}%)")
     print()
 
-    # Distribution summary (top totals by frequency)
+    print("Outcomes:")
+    print(f"  WIN : {win} ({win / trials * 100:.2f}%)")
+    print(f"  DRAW: {draw} ({draw / trials * 100:.2f}%)")
+    print(f"  LOSE: {lose} ({lose / trials * 100:.2f}%)")
+    print()
+
+    print(f"Average total: {report.averages.avg_total:.2f}")
+    print(f"Average points delta: {report.averages.avg_points_delta:.2f}")
+    print()
+
     items = sorted(
-        report.total_distribution.items(),
-        key=lambda kv: kv[1], reverse=True
+        report.counts.total_distribution.items(),
+        key=lambda kv: kv[1],
+        reverse=True,
     )
+
     print(f"Top {min(top_n_totals, len(items))} totals by frequency:")
     for total, freq in items[:top_n_totals]:
         print(
-            f"  total={total:<3}  freq={freq:<6}  ({freq/report.trials*100:.2f}%)")
+            f"  total={total:<3}  freq={freq:<6}  ({freq / trials * 100:.2f}%)")
 
-    # Also show min/max totals observed (sanity)
-    observed_totals = list(report.total_distribution.keys())
-    print()
-    print(
-        f"Observed total range: {min(observed_totals)} .. {max(observed_totals)}")
+    observed_totals = list(report.counts.total_distribution.keys())
+    if observed_totals:
+        print()
+        print(
+            f"Observed total range: {min(observed_totals)} .. {max(observed_totals)}")
+
     print("-----------------------------\n")
+
+
+def print_distribution_sorted(report: SimulationReport) -> None:
+    trials = report.config.trials
+    dist = report.counts.total_distribution
+    if not dist:
+        return
+    print("\nDistribution (sorted by total):")
+    for total in sorted(dist):
+        freq = dist[total]
+        print(f"  {total:>3}: {freq:<6} ({freq/trials*100:.2f}%)")
+    print()

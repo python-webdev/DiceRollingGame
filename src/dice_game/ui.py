@@ -28,6 +28,23 @@ def ask_int(prompt: str, *, min_value: int | None = None) -> int:
         return value
 
 
+def ask_simulation_trials() -> int:
+    print("\nSimulation trials options:")
+    print("1) 10,000")
+    print("2) 100,000")
+    print("3) Custom\n")
+
+    while True:
+        choice = input("Choose (1-3): ").strip()
+        if choice == "1":
+            return 10_000
+        if choice == "2":
+            return 100_000
+        if choice == "3":
+            return ask_int("Enter trials: ", min_value=1)
+        print("\nInvalid choice.\n")
+
+
 def choose_mode() -> GameMode:
     while True:
         mode = input("Choose a mode (Classic/Lucky/Risk): ").strip().lower()
@@ -61,11 +78,12 @@ def get_roll_context():
 def ask_menu_action() -> str:
     """
     r = roll
-    h = history (last N / filter / best)
+    h = history
+    s = simulation
     q = quit
     """
     while True:
-        ans = input("(r)oll, (h)istory, (q)uit: ").strip().lower()
-        if ans in ("r", "h", "q"):
+        ans = input("(r)oll, (h)istory, (s)imulate, (q)uit: ").strip().lower()
+        if ans in ("r", "h", "s", "q"):
             return ans
-        print("\nInvalid choice. Enter r, h, or q.\n")
+        print("\nInvalid choice. Enter r, h, s, or q.\n")

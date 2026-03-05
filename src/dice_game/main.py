@@ -2,7 +2,12 @@
 from .config import GameConfig
 from .models import TurnOutcome, TurnState
 from .stats import Stats
-from .ui import ask_int, ask_menu_action, get_roll_context
+from .ui import (
+    ask_int,
+    ask_menu_action,
+    get_roll_context,
+    ask_simulation_trials,
+)
 from .logic import (
     roll_dice,
     build_temp_result,
@@ -15,6 +20,8 @@ from .printing import (
     print_stats,
     print_history,
     print_best_roll,
+    print_simulation_report,
+    print_distribution_sorted,
 )
 from .history import (
     history_path,
@@ -24,6 +31,7 @@ from .history import (
     filter_history,
     best_roll,
 )
+from .simulation import simulate
 
 
 def play_turn(state: TurnState) -> TurnOutcome:
@@ -89,6 +97,19 @@ def main() -> None:
 
     while True:
         action = ask_menu_action()
+
+        if action == "s":
+            context = get_roll_context()
+
+            trials = ask_simulation_trials()
+            report = simulate(
+                game_config=state.game_config,
+                context=context,
+                trials=trials,
+            )
+            print_simulation_report(report, top_n_totals=10)
+            print_distribution_sorted(report)
+            continue
 
         if action == "q":
             print("\nThank you for playing! Goodbye!\n")
