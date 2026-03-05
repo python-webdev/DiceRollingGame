@@ -1,8 +1,7 @@
-# from typing import Any
-
 from .stats import Stats
 from .models import RollResult
 from .history import HistoryRecord
+from .simulation import SimulationReport
 
 
 def print_turn_result(result: RollResult) -> None:
@@ -75,3 +74,46 @@ def print_best_roll(record: HistoryRecord | None) -> None:
     print(f"Rolls: {record.get('rolls')}  Total: {record.get('total')}")
     print(f"Points total after roll: {record.get('points_total')}")
     print("------------------------\n")
+
+
+def print_simulation_report(report: SimulationReport, *, top_n_totals: int) -> None:
+    if report.trials == 0:
+        print("\nSimulation: No trials were run, so no report to show.\n")
+        return
+
+    win = report.counts.outcomes.get("win", 0)
+    draw = report.counts.outcomes.get("draw", 0)
+    lose = report.counts.outcomes.get("lose", 0)
+
+    print("\n----- Simulation Report -----")
+    print(f"Trials: {report.trials}")
+    print(f"Dice: {report.dice} × D{report.sides}")
+    print(f"Match count: {report.match_count}")
+    print(
+        f"Match probability: {report.match_probability:.4f} ({report.match_probability*100:.2f}%)")
+    print()
+    print("Outcomes:")
+    print(f"  WIN : {win} ({win/report.trials*100:.2f}%)")
+    print(f"  DRAW: {draw} ({draw/report.trials*100:.2f}%)")
+    print(f"  LOSE: {lose} ({lose/report.trials*100:.2f}%)")
+    print()
+    print(f"Average total: {report.avg_total:.2f}")
+    print(f"Average points delta: {report.avg_points_delta:.2f}")
+    print()
+
+    # Distribution summary (top totals by frequency)
+    items = sorted(
+        report.total_distribution.items(),
+        key=lambda kv: kv[1], reverse=True
+    )
+    print(f"Top {min(top_n_totals, len(items))} totals by frequency:")
+    for total, freq in items[:top_n_totals]:
+        print(
+            f"  total={total:<3}  freq={freq:<6}  ({freq/report.trials*100:.2f}%)")
+
+    # Also show min/max totals observed (sanity)
+    observed_totals = list(report.total_distribution.keys())
+    print()
+    print(
+        f"Observed total range: {min(observed_totals)} .. {max(observed_totals)}")
+    print("-----------------------------\n")
