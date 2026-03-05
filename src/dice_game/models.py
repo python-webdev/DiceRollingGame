@@ -1,10 +1,18 @@
+# Allows using clsses as types before they are defined
+from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+# Only import for type checking to avoid circular imports
+from typing import TYPE_CHECKING
 
 from .config import GameConfig
 from .modes import GameMode
 from .stats import Stats
+
+
+if TYPE_CHECKING:
+    # Importing only for type hints to avoid circular imports
+    from .history import HistoryRecord
 
 
 @dataclass(frozen=True)
@@ -58,7 +66,7 @@ class TurnState:
     player_points: int = 0
 
     history_path: Path | None = None
-    history: list[dict[str, Any]] = field(default_factory=list)
+    history: list[HistoryRecord] = field(default_factory=list)
 
 
 @dataclass(frozen=True)

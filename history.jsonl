@@ -1,2 +1,8 @@
 {"time": "2026-03-04T21:15:15.054283+00:00", "mode": "LUCKY", "dice": 2, "dice_type": "D4", "sides": 4, "rolls": [1, 2], "total": 3, "match": false, "outcome": "lose", "points_delta": 3, "points_total": 3}
 {"time": "2026-03-04T21:15:31.727687+00:00", "mode": "LUCKY", "dice": 2, "dice_type": "D8", "sides": 8, "rolls": [2, 4], "total": 6, "match": false, "outcome": "lose", "points_delta": 3, "points_total": 6}
+{"time": "2026-03-05T03:43:07.875891+00:00", "mode": "LUCKY", "dice": 2, "dice_type": "D4", "sides": 4, "rolls": [2, 2], "total": 4, "match": true, "outcome": "lose", "points_delta": 10, "points_total": 10}
+{"time": "2026-03-05T03:43:29.588788+00:00", "mode": "LUCKY", "dice": 2, "dice_type": "D8", "sides": 8, "rolls": [1, 7], "total": 8, "match": false, "outcome": "lose", "points_delta": 3, "points_total": 13}
+{"time": "2026-03-05T03:44:00.538919+00:00", "mode": "CLASSIC", "dice": 2, "dice_type": "D12", "sides": 12, "rolls": [3, 6], "total": 9, "match": false, "outcome": "lose", "points_delta": 3, "points_total": 16}
+{"time": "2026-03-05T03:52:50.815038+00:00", "mode": "LUCKY", "dice": 2, "dice_type": "D8", "sides": 8, "rolls": [7, 3], "total": 10, "match": false, "outcome": "draw", "points_delta": 0, "points_total": 0}
+{"time": "2026-03-05T03:56:57.287420+00:00", "mode": "LUCKY", "dice": 2, "dice_type": "D4", "sides": 4, "rolls": [2, 3], "total": 5, "match": false, "outcome": "lose", "points_delta": 3, "points_total": 3}
+{"time": "2026-03-05T04:06:45.276611+00:00", "mode": "LUCKY", "dice": 2, "dice_type": "D4", "sides": 4, "rolls": [3, 2], "total": 5, "match": false, "outcome": "lose", "points_delta": 3, "points_total": 3}

@@ -1,6 +1,8 @@
-from typing import Any
+# from typing import Any
+
 from .stats import Stats
 from .models import RollResult
+from .history import HistoryRecord
 
 
 def print_turn_result(result: RollResult) -> None:
@@ -45,7 +47,7 @@ def print_stats(stats: Stats, points_total: int) -> None:
     print()
 
 
-def print_history(records: list[dict[str, Any]]) -> None:
+def print_history(records: list[HistoryRecord]) -> None:
     if not records:
         print("\nNo history records found.\n")
         return
@@ -62,7 +64,7 @@ def print_history(records: list[dict[str, Any]]) -> None:
     print("-----------------\n")
 
 
-def print_best_roll(record: dict[str, Any] | None) -> None:
+def print_best_roll(record: HistoryRecord | None) -> None:
     if record is None:
         print("\nNo history yet, so no best roll.\n")
         return
