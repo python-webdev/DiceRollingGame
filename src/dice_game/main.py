@@ -1,4 +1,3 @@
-# src/dice_game/main.py
 from .config import GameConfig
 from .models import TurnOutcome, TurnState
 from .stats import Stats
@@ -26,12 +25,13 @@ from .printing import (
 from .history import (
     history_path,
     load_history,
-    append_history,
+    # append_history,
     last_n,
     filter_history,
     best_roll,
 )
 from .simulation import simulate
+from .storage import init_db, save_roll
 
 
 def play_turn(state: TurnState) -> TurnOutcome:
@@ -80,6 +80,7 @@ def run_history_menu(state: TurnState) -> None:
 
 
 def main() -> None:
+    init_db()
     path = history_path()
     history = load_history(path)
 
@@ -129,8 +130,9 @@ def main() -> None:
             print_stats(state.stats, state.player_points)
 
             # SAVE (every roll)
-            record = append_history(path, outcome.result)
-            state.history.append(record)
+            save_roll(outcome.result)
+            # record = append_history(path, outcome.result)
+            # state.history.append(record)
 
             if not outcome.extra_turn:
                 break
