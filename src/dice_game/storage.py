@@ -13,7 +13,8 @@ class DatabaseRecord(HistoryRecord):
     id: int
 
 
-DB_PATH = Path("rolls.db")
+# DB_PATH = Path("rolls.db")
+DB_PATH = Path(__file__).resolve().parent / "rolls.db"
 
 
 def get_connection() -> sqlite3.Connection:
@@ -109,3 +110,20 @@ def filter_rolls(*, sides: int | None = None, dice: int | None = None) -> list[D
         cur = conn.execute(query, params)
         rows = cur.fetchall()
         return [cast(DatabaseRecord, dict(row)) for row in rows]
+
+
+def clear_rolls(*, reset_ids: bool = False, vacuum: bool = True) -> int:
+    with get_connection() as conn:
+        cur = conn.execute("SELECT COUNT(*) AS c FROM rolls")
+        count = int(cur.fetchone()["c"])
+
+        conn.execute("DELETE FROM rolls")
+
+        if reset_ids:
+            conn.execute("DELETE FROM sqlite_sequence WHERE name='rolls'")
+
+    if vacuum and count > 0:
+        with get_connection() as conn:
+            conn.execute("VACUUM")
+
+    return count

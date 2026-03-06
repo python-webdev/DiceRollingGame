@@ -1,7 +1,30 @@
+import json
 from .stats import Stats
 from .models import RollResult
 from .history import HistoryRecord
 from .simulation import SimulationReport
+
+
+def _format_rolls(value: object) -> str:
+    """
+    DB stores rolls as JSON text; JSON history might store as list.
+    Return a nice string in both cases.
+    """
+    if isinstance(value, list):
+        return "[" + ", ".join(map(str, value)) + "]"
+
+    if isinstance(value, str):
+        # try decode JSON string like "[1,2,3]"
+        try:
+            parsed = json.loads(value)
+            if isinstance(parsed, list):
+                return "[" + ", ".join(map(str, parsed)) + "]"
+        except json.JSONDecodeError:
+            pass
+        # fallback: raw string
+        return value
+
+    return str(value)
 
 
 def print_turn_result(result: RollResult) -> None:
@@ -58,7 +81,7 @@ def print_history(records: list[HistoryRecord]) -> None:
         dice_type = r.get("dice_type", "?")
         dice = r.get("dice", "?")
         total = r.get("total", "?")
-        rolls = r.get("rolls", [])
+        rolls = _format_rolls(r.get("rolls", []))
         print(f"{time} | {mode:<6} | {dice}×{dice_type} | rolls={rolls} | total={total}")
     print("-----------------\n")
 
@@ -71,7 +94,8 @@ def print_best_roll(record: HistoryRecord | None) -> None:
     print(f"Time: {record.get('time')}")
     print(f"Mode: {record.get('mode')}")
     print(f"Dice: {record.get('dice')}×{record.get('dice_type')}")
-    print(f"Rolls: {record.get('rolls')}  Total: {record.get('total')}")
+    print(
+        f"Rolls: {_format_rolls(record.get('rolls'))}  Total: {record.get('total')}")
     print(f"Points total after roll: {record.get('points_total')}")
     print("------------------------\n")
 

@@ -22,16 +22,16 @@ from .printing import (
     print_simulation_report,
     print_distribution_sorted,
 )
-from .history import (
-    history_path,
-    load_history,
-    # append_history,
-    last_n,
-    filter_history,
-    best_roll,
-)
+
 from .simulation import simulate
-from .storage import init_db, save_roll
+from .storage import (
+    clear_rolls,
+    init_db,
+    save_roll,
+    last_rolls,
+    filter_rolls,
+    best_roll as best_roll_db,
+)
 
 
 def play_turn(state: TurnState) -> TurnOutcome:
@@ -47,7 +47,7 @@ def play_turn(state: TurnState) -> TurnOutcome:
     return TurnOutcome(result=result, extra_turn=extra_turn)
 
 
-def run_history_menu(state: TurnState) -> None:
+def run_history_menu() -> None:
     while True:
         print("\nHistory menu:")
         print("1) View last N rolls")
@@ -60,18 +60,18 @@ def run_history_menu(state: TurnState) -> None:
 
         if choice == "1":
             n = ask_int("How many last rolls? ", min_value=1)
-            print_history(last_n(state.history, n))
+            print_history(last_rolls(n))
 
         elif choice == "2":
             sides = ask_int("Enter sides (e.g., 6/10/20): ", min_value=2)
-            print_history(filter_history(state.history, sides=sides))
+            print_history(filter_rolls(sides=sides))
 
         elif choice == "3":
             dice = ask_int("Enter number of dice: ", min_value=1)
-            print_history(filter_history(state.history, dice=dice))
+            print_history(filter_rolls(dice=dice))
 
         elif choice == "4":
-            print_best_roll(best_roll(state.history))
+            print_best_roll(best_roll_db())
 
         elif choice == "5":
             return
@@ -81,20 +81,14 @@ def run_history_menu(state: TurnState) -> None:
 
 def main() -> None:
     init_db()
-    path = history_path()
-    history = load_history(path)
 
     state = TurnState(
         game_config=GameConfig(),
         stats=Stats(),
         player_points=0,
-        history_path=path,
-        history=history,
     )
 
     print("--- Welcome to the Dice Rolling Game! ---")
-    print(f"History file: {path.resolve()}")
-    print(f"Loaded records: {len(state.history)}\n")
 
     while True:
         action = ask_menu_action()
@@ -117,11 +111,20 @@ def main() -> None:
             print_stats(state.stats, state.player_points)
             break
 
-        if action == "h":
-            run_history_menu(state)
+        if action == "c":
+            confirm = input(
+                "\nAre you sure you want to clear history? This cannot be undone. (y/n): ").strip().lower()
+            if confirm == "y":
+                deleted = clear_rolls(reset_ids=True)
+                print(f"\nHistory cleared. Deleted {deleted} records.\n")
+            else:
+                print("\nClear history cancelled.\n")
             continue
 
-        # action == "r"
+        if action == "h":
+            run_history_menu()
+            continue
+
         while True:
             outcome = play_turn(state)
 
@@ -131,8 +134,6 @@ def main() -> None:
 
             # SAVE (every roll)
             save_roll(outcome.result)
-            # record = append_history(path, outcome.result)
-            # state.history.append(record)
 
             if not outcome.extra_turn:
                 break

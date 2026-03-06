@@ -64,7 +64,6 @@ def choose_dice_type() -> str:
 
 
 def get_roll_context():
-    # local import avoids circular imports
 
     num_dice = ask_int(
         "How many dice would you like to roll? ", min_value=MIN_DICE)
@@ -80,10 +79,12 @@ def ask_menu_action() -> str:
     r = roll
     h = history
     s = simulation
+    c = clear history
     q = quit
     """
     while True:
-        ans = input("(r)oll, (h)istory, (s)imulate, (q)uit: ").strip().lower()
-        if ans in ("r", "h", "s", "q"):
+        ans = input(
+            "(r)oll, (h)istory, (s)imulate, (c)lear history, (q)uit: ").strip().lower()
+        if ans in ("r", "h", "s", "c", "q"):
             return ans
-        print("\nInvalid choice. Enter r, h, s, or q.\n")
+        print("\nInvalid choice. Enter r, h, s, c, or q.\n")
