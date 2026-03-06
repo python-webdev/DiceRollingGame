@@ -13,7 +13,6 @@ class DatabaseRecord(HistoryRecord):
     id: int
 
 
-# DB_PATH = Path("rolls.db")
 DB_PATH = Path(__file__).resolve().parent / "rolls.db"
 
 
