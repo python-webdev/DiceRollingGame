@@ -1,6 +1,6 @@
 import builtins
 
-from dice_game.ui import GameUI, GameMode
+from dice_game.cli.ui import GameUI, GameMode
 
 
 def _patch_inputs(monkeypatch, values):

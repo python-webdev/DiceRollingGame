@@ -1,4 +1,4 @@
-from dice_game.stats import Stats
+from dice_game.domain.stats import Stats
 
 
 def test_initial_state():

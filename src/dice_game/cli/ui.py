@@ -1,6 +1,6 @@
-from .constants import DICE_TYPES, MIN_DICE
-from .modes import GameMode
-from .models import RollContext
+from ..domain.constants import DICE_TYPES, MIN_DICE
+from ..domain.modes import GameMode
+from ..domain.models import RollContext
 
 
 def ask_yes_no(prompt: str) -> str:

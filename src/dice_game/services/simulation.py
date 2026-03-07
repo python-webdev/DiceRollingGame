@@ -3,9 +3,9 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass
 
-from .config import GameConfig
+from ..domain.config import GameConfig
 from .logic import determine_outcome, roll_dice, points_for_turn
-from .models import RollContext, RollResult
+from ..domain.models import RollContext, RollResult
 
 
 @dataclass(frozen=True)

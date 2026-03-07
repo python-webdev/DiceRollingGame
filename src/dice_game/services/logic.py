@@ -1,7 +1,7 @@
 import random
 
-from .config import GameConfig
-from .models import RollContext, RollResult, TurnState
+from ..domain.config import GameConfig
+from ..domain.models import RollContext, RollResult, TurnState
 
 
 def roll_dice(context: RollContext) -> list[int]:

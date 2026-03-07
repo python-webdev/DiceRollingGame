@@ -1,8 +1,8 @@
 import json
-from .stats import Stats
-from .models import RollResult
-from .history import HistoryRecord
-from .simulation import SimulationReport
+from ..domain.stats import Stats
+from ..domain.models import RollResult
+from ..storage.history_types import HistoryRecord
+from ..services.simulation import SimulationReport
 
 
 def _format_rolls(value: object) -> str:

@@ -14,7 +14,7 @@ from dice_game.main import (
     print_turn_outcome,
     print_turn_points,
 )
-from dice_game.stats import Stats
+from dice_game.domain.stats import Stats
 
 
 def make_ui(

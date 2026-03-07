@@ -10,7 +10,7 @@ from .stats import Stats
 
 if TYPE_CHECKING:
     # Importing only for type hints to avoid circular imports
-    from .history import HistoryRecord
+    from ..storage.history_types import HistoryRecord
 
 
 @dataclass(frozen=True)

@@ -4,8 +4,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import cast
 
-from .models import RollResult
-from .history import HistoryRecord
+from ..domain.models import RollResult
+from .history_types import HistoryRecord
 
 
 # Extend HistoryRecord because DB results also have an 'id'

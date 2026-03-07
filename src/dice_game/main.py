@@ -1,20 +1,20 @@
-from .config import GameConfig
-from .models import TurnOutcome, TurnState
-from .stats import Stats
-from .ui import (
+from .domain.config import GameConfig
+from .domain.models import TurnOutcome, TurnState
+from .domain.stats import Stats
+from .cli.ui import (
     ask_int,
     ask_menu_action,
     get_roll_context,
     ask_simulation_trials,
 )
-from .logic import (
+from .services.logic import (
     roll_dice,
     build_temp_result,
     resolve_turn,
     apply_turn_effects,
     finalize_result,
 )
-from .printing import (
+from .cli.printing import (
     print_turn_result,
     print_stats,
     print_history,
@@ -23,8 +23,8 @@ from .printing import (
     print_distribution_sorted,
 )
 
-from .simulation import simulate
-from .storage import (
+from .services.simulation import simulate
+from .storage.sqlite_storage import (
     clear_rolls,
     init_db,
     save_roll,
