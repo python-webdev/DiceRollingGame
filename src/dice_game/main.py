@@ -1,36 +1,38 @@
-from .domain.config import GameConfig
-from .domain.models import TurnOutcome, TurnState
-from .domain.stats import Stats
+from .cli.printing import (
+    print_best_roll,
+    print_distribution_sorted,
+    print_history,
+    print_history_page_info,
+    print_simulation_report,
+    print_stats,
+    print_turn_result,
+)
 from .cli.ui import (
     ask_int,
     ask_menu_action,
-    get_roll_context,
     ask_simulation_trials,
+    get_roll_context,
 )
+from .domain.config import GameConfig
+from .domain.models import TurnOutcome, TurnState
+from .domain.stats import Stats
 from .services.logic import (
-    roll_dice,
-    build_temp_result,
-    resolve_turn,
     apply_turn_effects,
+    build_temp_result,
     finalize_result,
+    resolve_turn,
+    roll_dice,
 )
-from .cli.printing import (
-    print_turn_result,
-    print_stats,
-    print_history,
-    print_best_roll,
-    print_simulation_report,
-    print_distribution_sorted,
-)
-
 from .services.simulation import simulate
 from .storage.sqlite_storage import (
-    clear_rolls,
-    init_db,
-    save_roll,
-    last_rolls,
-    filter_rolls,
     best_roll as best_roll_db,
+)
+from .storage.sqlite_storage import (
+    clear_rolls,
+    count_rolls,
+    init_db,
+    paginated_rolls,
+    save_roll,
 )
 
 
@@ -47,11 +49,68 @@ def play_turn(state: TurnState) -> TurnOutcome:
     return TurnOutcome(result=result, extra_turn=extra_turn)
 
 
+def browse_history_paginated(
+    *,
+    page_size: int = 10,
+    sides: int | None = None,
+    dice: int | None = None,
+) -> None:
+    total = count_rolls(sides=sides, dice=dice)
+
+    if total == 0:
+        print("\nNo history records found.\n")
+        return
+
+    offset = 0
+
+    while True:
+        records = paginated_rolls(
+            offset=offset,
+            limit=page_size,
+            sides=sides,
+            dice=dice,
+        )
+
+        print_history_page_info(
+            offset=offset,
+            page_size=page_size,
+            total=total,
+        )
+        print_history(records)
+
+        commands: list[str] = []
+        if offset + page_size < total:
+            commands.append("n)ext page")
+        if offset > 0:
+            commands.append("p)revious page")
+        commands.append("q)uit")
+
+        print(", ".join(commands))
+        choice = input("Choose: ").strip().lower()
+
+        if choice == "n":
+            if offset + page_size < total:
+                offset += page_size
+            else:
+                print("\nAlready at the last page.\n")
+
+        elif choice == "p":
+            if offset > 0:
+                offset = max(0, offset - page_size)
+            else:
+                print("\nAlready at the first page.\n")
+
+        elif choice == "q":
+            return
+        else:
+            print("\nInvalid choice.\n")
+
+
 def run_history_menu() -> None:
     while True:
         print("\nHistory menu:")
-        print("1) View last N rolls")
-        print("2) Filter by sides (d6/d10/d20 etc)")
+        print("1) View paginated history")
+        print("2) Filter by sides (e.g., 4/6/8)")
         print("3) Filter by number of dice")
         print("4) Show best roll ever")
         print("5) Back\n")
@@ -59,16 +118,15 @@ def run_history_menu() -> None:
         choice = input("Choose (1-5): ").strip()
 
         if choice == "1":
-            n = ask_int("How many last rolls? ", min_value=1)
-            print_history(last_rolls(n))
+            browse_history_paginated(page_size=10)
 
         elif choice == "2":
-            sides = ask_int("Enter sides (e.g., 6/10/20): ", min_value=2)
-            print_history(filter_rolls(sides=sides))
+            sides = ask_int("Enter sides (e.g., 4/6/8): ", min_value=2)
+            browse_history_paginated(page_size=10, sides=sides)
 
         elif choice == "3":
             dice = ask_int("Enter number of dice: ", min_value=1)
-            print_history(filter_rolls(dice=dice))
+            browse_history_paginated(page_size=10, dice=dice)
 
         elif choice == "4":
             print_best_roll(best_roll_db())
@@ -112,8 +170,13 @@ def main() -> None:
             break
 
         if action == "c":
-            confirm = input(
-                "\nAre you sure you want to clear history? This cannot be undone. (y/n): ").strip().lower()
+            confirm = (
+                input(
+                    "\nAre you sure you want to clear history? This cannot be undone. (y/n): "
+                )
+                .strip()
+                .lower()
+            )
             if confirm == "y":
                 deleted = clear_rolls(reset_ids=True)
                 print(f"\nHistory cleared. Deleted {deleted} records.\n")

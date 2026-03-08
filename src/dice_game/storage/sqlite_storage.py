@@ -75,9 +75,7 @@ def save_roll(result: RollResult) -> None:
 # -------- queries --------
 def last_rolls(n: int) -> list[DatabaseRecord]:
     with get_connection() as conn:
-        cur = conn.execute(
-            "SELECT * FROM rolls ORDER BY id DESC LIMIT ?", (n,)
-        )
+        cur = conn.execute("SELECT * FROM rolls ORDER BY id DESC LIMIT ?", (n,))
         # Convert sqlite3.Row objects to actual dicts for the TypedDict
         rows = cur.fetchall()
         return [cast(DatabaseRecord, dict(row)) for row in rows]
@@ -85,14 +83,14 @@ def last_rolls(n: int) -> list[DatabaseRecord]:
 
 def best_roll() -> DatabaseRecord | None:
     with get_connection() as conn:
-        cur = conn.execute(
-            "SELECT * FROM rolls ORDER BY total DESC LIMIT 1"
-        )
+        cur = conn.execute("SELECT * FROM rolls ORDER BY total DESC LIMIT 1")
         row = cur.fetchone()
         return cast(DatabaseRecord, dict(row)) if row else None
 
 
-def filter_rolls(*, sides: int | None = None, dice: int | None = None) -> list[DatabaseRecord]:
+def filter_rolls(
+    *, sides: int | None = None, dice: int | None = None
+) -> list[DatabaseRecord]:
     query = "SELECT * FROM rolls WHERE 1=1"
     # Changed from Any to int since these specific filters are ints
     params: list[int] = []
@@ -113,8 +111,8 @@ def filter_rolls(*, sides: int | None = None, dice: int | None = None) -> list[D
 
 def clear_rolls(*, reset_ids: bool = False, vacuum: bool = True) -> int:
     with get_connection() as conn:
-        cur = conn.execute("SELECT COUNT(*) AS c FROM rolls")
-        count = int(cur.fetchone()["c"])
+        cur = conn.execute("SELECT COUNT(*) AS count FROM rolls")
+        count = int(cur.fetchone()["count"])
 
         conn.execute("DELETE FROM rolls")
 
@@ -126,3 +124,48 @@ def clear_rolls(*, reset_ids: bool = False, vacuum: bool = True) -> int:
             conn.execute("VACUUM")
 
     return count
+
+
+def count_rolls(*, sides: int | None = None, dice: int | None = None) -> int:
+    query = "SELECT COUNT(*) AS count FROM rolls WHERE 1=1"
+    params: list[int] = []
+
+    if sides is not None:
+        query += " AND sides=?"
+        params.append(sides)
+
+    if dice is not None:
+        query += " AND dice=?"
+        params.append(dice)
+
+    with get_connection() as conn:
+        cur = conn.execute(query, params)
+        row = cur.fetchone()
+        return int(row["count"]) if row else 0
+
+
+def paginated_rolls(
+    *,
+    limit: int,
+    offset: int,
+    sides: int | None = None,
+    dice: int | None = None,
+) -> list[DatabaseRecord]:
+    query = "SELECT * FROM rolls WHERE 1=1"
+    params: list[int] = []
+
+    if sides is not None:
+        query += " AND sides=?"
+        params.append(sides)
+
+    if dice is not None:
+        query += " AND dice=?"
+        params.append(dice)
+
+    query += " ORDER BY id DESC LIMIT ? OFFSET ?"
+    params.extend([limit, offset])
+
+    with get_connection() as conn:
+        cur = conn.execute(query, params)
+        rows = cur.fetchall()
+        return [cast(DatabaseRecord, dict(row)) for row in rows]

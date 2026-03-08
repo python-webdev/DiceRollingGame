@@ -158,3 +158,18 @@ def print_distribution_sorted(report: SimulationReport) -> None:
         freq = dist[total]
         print(f"  {total:>3}: {freq:<6} ({freq/trials*100:.2f}%)")
     print()
+
+
+def print_history_page_info(
+        *,
+        offset: int,
+        page_size: int,
+        total: int,
+) -> None:
+    if total == 0:
+        print('\nShowing 0 of 0 records.\n')
+        return
+
+    start = offset + 1
+    end = min(offset + page_size, total)
+    print(f'\nShowing records {start}-{end} of {total} records.\n')
