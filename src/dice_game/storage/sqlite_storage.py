@@ -169,3 +169,41 @@ def paginated_rolls(
         cur = conn.execute(query, params)
         rows = cur.fetchall()
         return [cast(DatabaseRecord, dict(row)) for row in rows]
+
+
+def overall_stats() -> dict[str, int | float | None]:
+    query = """
+SELECT
+    COUNT(*) AS total_rolls,
+    AVG(total) AS average_total,
+    SUM(match) AS total_matches,
+    MAX(total) AS highest_total,
+    MIN(total) AS lowest_total
+FROM rolls
+"""
+
+    with get_connection() as conn:
+        cur = conn.execute(query)
+        row = cur.fetchone()
+
+        if row is None or int(row[0]) == 0:
+            return {
+                "total_rolls": 0,
+                "average_total": None,
+                "total_matches": 0,
+                "highest_total": None,
+                "lowest_total": None,
+            }
+        return {
+            "total_rolls": int(row["total_rolls"]),
+            "average_total": float(row["average_total"])
+            if row["average_total"] is not None
+            else None,
+            "total_matches": int(row["total_matches"]),
+            "highest_total": int(row["highest_total"])
+            if row["highest_total"] is not None
+            else None,
+            "lowest_total": int(row["lowest_total"])
+            if row["lowest_total"] is not None
+            else None,
+        }

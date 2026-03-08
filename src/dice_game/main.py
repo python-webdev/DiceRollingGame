@@ -3,9 +3,12 @@ from .cli.printing import (
     print_distribution_sorted,
     print_history,
     print_history_page_info,
+    print_session_stats,
     print_simulation_report,
-    print_stats,
     print_turn_result,
+)
+from .cli.printing import (
+    print_overall_stats as print_overall_stats_from_db,
 )
 from .cli.ui import (
     ask_int,
@@ -33,6 +36,9 @@ from .storage.sqlite_storage import (
     init_db,
     paginated_rolls,
     save_roll,
+)
+from .storage.sqlite_storage import (
+    overall_stats as overall_stats_db,
 )
 
 
@@ -164,9 +170,14 @@ def main() -> None:
             print_distribution_sorted(report)
             continue
 
+        if action == "t":
+            stats_data = overall_stats_db()
+            print_overall_stats_from_db(stats_data)
+            continue
+
         if action == "q":
             print("\nThank you for playing! Goodbye!\n")
-            print_stats(state.stats, state.player_points)
+            print_session_stats(state.stats, state.player_points)
             break
 
         if action == "c":
@@ -193,7 +204,7 @@ def main() -> None:
 
             # PRINT
             print_turn_result(outcome.result)
-            print_stats(state.stats, state.player_points)
+            print_session_stats(state.stats, state.player_points)
 
             # SAVE (every roll)
             save_roll(outcome.result)

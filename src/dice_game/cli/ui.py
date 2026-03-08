@@ -1,6 +1,6 @@
 from ..domain.constants import DICE_TYPES, MIN_DICE
-from ..domain.modes import GameMode
 from ..domain.models import RollContext
+from ..domain.modes import GameMode
 
 
 def ask_yes_no(prompt: str) -> str:
@@ -21,8 +21,7 @@ def ask_int(prompt: str, *, min_value: int | None = None) -> int:
             continue
 
         if min_value is not None and value < min_value:
-            print(
-                f"\nDice count must be at least {min_value}. Please try again.\n")
+            print(f"\nDice count must be at least {min_value}. Please try again.\n")
             continue
 
         return value
@@ -65,8 +64,7 @@ def choose_dice_type() -> str:
 
 def get_roll_context():
 
-    num_dice = ask_int(
-        "How many dice would you like to roll? ", min_value=MIN_DICE)
+    num_dice = ask_int("How many dice would you like to roll? ", min_value=MIN_DICE)
     mode = choose_mode()
     dice_type = choose_dice_type()
     sides = DICE_TYPES[dice_type]
@@ -78,13 +76,17 @@ def ask_menu_action() -> str:
     """
     r = roll
     h = history
+    t = stats
     s = simulation
     c = clear history
     q = quit
     """
     while True:
-        ans = input(
-            "(r)oll, (h)istory, (s)imulate, (c)lear history, (q)uit: ").strip().lower()
-        if ans in ("r", "h", "s", "c", "q"):
+        ans = (
+            input("(r)oll, (h)istory, (t),stats (s)imulate, (c)lear history, (q)uit: ")
+            .strip()
+            .lower()
+        )
+        if ans in ("r", "h", "t", "s", "c", "q"):
             return ans
-        print("\nInvalid choice. Enter r, h, s, c, or q.\n")
+        print("\nInvalid choice. Enter r, h, t, s, c, or q.\n")
