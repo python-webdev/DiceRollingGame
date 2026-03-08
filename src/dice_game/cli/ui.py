@@ -78,15 +78,18 @@ def ask_menu_action() -> str:
     h = history
     t = stats
     s = simulation
+    e = export CSV
     c = clear history
     q = quit
     """
     while True:
         ans = (
-            input("(r)oll, (h)istory, (t),stats (s)imulate, (c)lear history, (q)uit: ")
+            input(
+                "(r)oll (h)istory s(t)ats (s)imulate (e)xport to CSV (c)lear history (q)uit: "
+            )
             .strip()
             .lower()
         )
-        if ans in ("r", "h", "t", "s", "c", "q"):
+        if ans in ("r", "h", "t", "s", "e", "c", "q"):
             return ans
-        print("\nInvalid choice. Enter r, h, t, s, c, or q.\n")
+        print("\nInvalid choice. Enter r, h, t, s, e, c, or q.\n")

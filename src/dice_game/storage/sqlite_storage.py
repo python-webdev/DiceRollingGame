@@ -1,9 +1,11 @@
+import csv
 import json
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import cast
 
+from ..domain.config import GameConfig
 from ..domain.models import RollResult
 from .history_types import HistoryRecord
 
@@ -207,3 +209,79 @@ FROM rolls
             if row["lowest_total"] is not None
             else None,
         }
+
+
+def export_rolls_to_csv(
+    file_path: str | None = None,
+) -> int:
+    """Export all roll history to a CSV file.
+
+    Args:
+        file_path: Optional custom path for the CSV file. If None, uses the
+                  configured export path (default: src/dice_game/exports/rolls_export.csv).
+                  Can be overridden by setting the DICE_GAME_EXPORT_PATH environment variable.
+
+    Returns:
+        Number of records exported.
+
+    Example:
+        # Use default/configured path
+        export_rolls_to_csv()
+
+        # Use custom path
+        export_rolls_to_csv("/tmp/my_export.csv")
+
+        # Use environment variable
+        # DICE_GAME_EXPORT_PATH="/tmp/export.csv" python3 -m dice_game
+    """
+    if file_path is None:
+        config = GameConfig()
+        file_path = config.exports.export_path
+    query = """
+        SELECT
+            id,
+            time,
+            mode,
+            dice,
+            dice_type,
+            sides,
+            rolls,
+            total,
+            match,
+            outcome,
+            points_delta,
+            points_total
+        FROM rolls
+        ORDER BY id DESC
+    """
+
+    with get_connection() as conn:
+        cur = conn.execute(query)
+        rows = cur.fetchall()
+
+    if not rows:
+        return 0
+
+    fieldnames = [
+        "id",
+        "time",
+        "mode",
+        "dice",
+        "dice_type",
+        "sides",
+        "rolls",
+        "total",
+        "match",
+        "outcome",
+        "points_delta",
+        "points_total",
+    ]
+
+    with open(file_path, mode="w", newline="", encoding="utf-8") as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+
+        for row in rows:
+            writer.writerow(dict(row))
+
+    return len(rows)

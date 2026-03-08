@@ -33,6 +33,7 @@ from .storage.sqlite_storage import (
 from .storage.sqlite_storage import (
     clear_rolls,
     count_rolls,
+    export_rolls_to_csv,
     init_db,
     paginated_rolls,
     save_roll,
@@ -197,6 +198,17 @@ def main() -> None:
 
         if action == "h":
             run_history_menu()
+            continue
+
+        if action == "e":
+            export = export_rolls_to_csv()
+
+            if export == 0:
+                print("\nNo history to export.\n")
+            else:
+                config = GameConfig()
+                export_path = config.exports.export_path
+                print(f"\nHistory exported: {export} records to '{export_path}'.\n")
             continue
 
         while True:
