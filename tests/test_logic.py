@@ -1,5 +1,12 @@
-from dice_game.domain.models import RollContext, RollResult
+from dice_game.domain.config import GameConfig
+from dice_game.domain.models import RollContext, RollResult, TurnState
 from dice_game.domain.modes import GameMode
+from dice_game.domain.stats import Stats
+from dice_game.services.logic import (
+    apply_turn_effects,
+    build_temp_result,
+    resolve_turn,
+)
 
 
 def test_roll_result_total():
@@ -32,3 +39,26 @@ def test_no_match():
     result = RollResult(context, [2, 4], "draw", 0, 0)
 
     assert result.has_match is False
+
+
+def test_lucky_mode_match_grants_extra_turn():
+    state = TurnState(
+        game_config=GameConfig(),
+        stats=Stats(),
+        player_points=0,
+    )
+
+    context = RollContext(
+        mode=GameMode.LUCKY,
+        dice_type="D6",
+        num_dice=2,
+        sides=6,
+    )
+
+    rolls = [4, 4]
+    temp_result = build_temp_result(context, rolls, state.player_points)
+    _, delta = resolve_turn(state.game_config, temp_result)
+    extra_turn = apply_turn_effects(state, temp_result, delta)
+
+    assert temp_result.is_lucky_match is True
+    assert extra_turn is True

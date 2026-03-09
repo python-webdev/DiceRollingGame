@@ -1,3 +1,4 @@
+from dice_game.storage import sqlite_storage
 from dice_game.storage.sqlite_storage import paginated_rolls
 
 
@@ -11,3 +12,43 @@ def test_offset_beyond_rows_returns_empty():
     rows = paginated_rolls(offset=1000, limit=10)
 
     assert rows == []
+
+
+def test_paginated_rolls_returns_remaining_rows_on_last_page(tmp_path, monkeypatch):
+
+    db_path = tmp_path / "test.db"
+    monkeypatch.setattr(sqlite_storage, "DB_PATH", db_path)
+    sqlite_storage.init_db()
+
+    # Insert 11 fake rows
+    with sqlite_storage.get_connection() as conn:
+        for i in range(11):
+            conn.execute(
+                """
+                INSERT INTO rolls (
+                    time, mode, dice, dice_type, sides,
+                    rolls, total, match, outcome,
+                    points_delta, points_total
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    f"2026-03-08T10:00:{i:02d}+00:00",
+                    "CLASSIC",
+                    2,
+                    "D6",
+                    6,
+                    "[1, 2]",
+                    3,
+                    0,
+                    "draw",
+                    0,
+                    0,
+                ),
+            )
+
+    page_1 = sqlite_storage.paginated_rolls(limit=10, offset=0)
+    page_2 = sqlite_storage.paginated_rolls(limit=10, offset=10)
+
+    assert len(page_1) == 10
+    assert len(page_2) == 1
