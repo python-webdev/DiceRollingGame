@@ -16,3 +16,19 @@ def test_roll_result_total():
     )
 
     assert result.total == 7
+
+
+def test_match_detection():
+    context = RollContext(GameMode.CLASSIC, "D6", 2, 6)
+
+    result = RollResult(context, [5, 5], "win", 5, 5)
+
+    assert result.has_match is True
+
+
+def test_no_match():
+    context = RollContext(GameMode.CLASSIC, "D6", 2, 6)
+
+    result = RollResult(context, [2, 4], "draw", 0, 0)
+
+    assert result.has_match is False

@@ -1,16 +1,11 @@
 # Allows using clsses as types before they are defined
 from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 
 from .config import GameConfig
 from .modes import GameMode
 from .stats import Stats
-
-
-if TYPE_CHECKING:
-    # Importing only for type hints to avoid circular imports
-    from ..storage.history_types import HistoryRecord
 
 
 @dataclass(frozen=True)
