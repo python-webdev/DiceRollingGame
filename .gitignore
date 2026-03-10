@@ -9,3 +9,5 @@ dist/
 build/
 *.egg
 *.log
+.coverage
+htmlcov/
