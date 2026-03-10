@@ -259,9 +259,6 @@ def export_rolls_to_csv(
         cur = conn.execute(query)
         rows = cur.fetchall()
 
-    if not rows:
-        return 0
-
     fieldnames = [
         "id",
         "time",
