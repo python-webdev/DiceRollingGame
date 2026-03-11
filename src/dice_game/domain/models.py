@@ -1,4 +1,3 @@
-# Allows using clsses as types before they are defined
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -10,6 +9,7 @@ from .stats import Stats
 
 @dataclass(frozen=True)
 class RollContext:
+    game_session_id: str
     mode: GameMode
     dice_type: str
     num_dice: int
@@ -55,8 +55,8 @@ class RollResult:
 @dataclass
 class TurnState:
     game_config: GameConfig
-    stats: Stats
     player_points: int = 0
+    stats: Stats | None = None
 
 
 @dataclass(frozen=True)

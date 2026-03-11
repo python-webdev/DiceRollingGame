@@ -1,29 +1,55 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 
 from ...storage.sqlite_storage import (
-    clear_rolls,
-    export_rolls_to_csv,
-    paginated_rolls,
+    clear_rolls_by_session,
+    export_rolls_to_csv_by_session,
+    get_game_session,
+    paginated_rolls_by_session,
+    reset_game_session,
 )
 
-router = APIRouter()
+router = APIRouter(prefix="/sessions", tags=["history"])
 
 
-@router.get("/history")
-def get_history(limit: int = 10, offset: int = 0):
-    rows = paginated_rolls(limit=limit, offset=offset)
-    return rows
+@router.get("/{game_session_id}/history")
+def get_history(
+    game_session_id: str,
+    limit: int = Query(default=10, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+):
+    session = get_game_session(game_session_id)
+    if session is None:
+        raise HTTPException(status_code=404, detail="Game session not found")
+
+    return paginated_rolls_by_session(
+        game_session_id,
+        limit=limit,
+        offset=offset,
+    )
 
 
-@router.delete("/history")
-def delete_history():
-    deleted = clear_rolls(reset_ids=True)
-    return {"deleted_records": deleted}
+@router.delete("/{game_session_id}/history")
+def delete_history(game_session_id: str):
+    session = get_game_session(game_session_id)
+    if session is None:
+        raise HTTPException(status_code=404, detail="Game session not found")
+
+    deleted = clear_rolls_by_session(game_session_id)
+    reset_game_session(game_session_id)
+
+    return {
+        "deleted_records": deleted,
+        "player_points": 0,
+    }
 
 
-@router.get("/history/export")
-def export_history():
-    exported = export_rolls_to_csv()
+@router.get("/{game_session_id}/history/export")
+def export_history(game_session_id: str):
+    session = get_game_session(game_session_id)
+    if session is None:
+        raise HTTPException(status_code=404, detail="Game session not found")
+
+    exported = export_rolls_to_csv_by_session(game_session_id)
 
     if exported == 0:
         raise HTTPException(status_code=404, detail="No rolls to export")
@@ -31,5 +57,5 @@ def export_history():
     return {
         "message": f"Exported {exported} rolls to CSV file",
         "records": exported,
-        "file": "roll_history.csv",
+        "file": f"roll_history_{game_session_id}.csv",
     }
