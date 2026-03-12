@@ -2,9 +2,10 @@ import csv
 import json
 import sqlite3
 import uuid
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import TypedDict, cast
+from typing import Iterator, TypedDict, cast
 
 from ..domain.config import GameConfig
 from ..domain.models import RollResult
@@ -43,11 +44,17 @@ def utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def get_connection() -> sqlite3.Connection:
+@contextmanager
+def connection() -> Iterator[sqlite3.Connection]:
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
-    return conn
+    try:
+        yield conn
+        conn.commit()
+    finally:
+        conn.close()
+
 
 
 def _column_exists(conn: sqlite3.Connection, table_name: str, column_name: str) -> bool:
@@ -56,7 +63,7 @@ def _column_exists(conn: sqlite3.Connection, table_name: str, column_name: str) 
 
 
 def init_db() -> None:
-    with get_connection() as conn:
+    with connection() as conn:
         conn.execute("PRAGMA foreign_keys = ON")
 
         conn.execute(
@@ -100,7 +107,7 @@ def init_db() -> None:
 
 
 def save_roll(result: RollResult) -> None:
-    with get_connection() as conn:
+    with connection() as conn:
         conn.execute(
             """
             INSERT INTO rolls (
@@ -144,14 +151,14 @@ def _row_to_database_record(row: sqlite3.Row) -> DatabaseRecord:
 
 # -------- queries --------
 def last_rolls(n: int) -> list[DatabaseRecord]:
-    with get_connection() as conn:
+    with connection() as conn:
         cur = conn.execute("SELECT * FROM rolls ORDER BY id DESC LIMIT ?", (n,))
         rows = cur.fetchall()
         return [_row_to_database_record(row) for row in rows]
 
 
 def best_roll() -> DatabaseRecord | None:
-    with get_connection() as conn:
+    with connection() as conn:
         cur = conn.execute("SELECT * FROM rolls ORDER BY total DESC LIMIT 1")
         row = cur.fetchone()
         return _row_to_database_record(row) if row else None
@@ -173,14 +180,14 @@ def filter_rolls(
         query += " AND dice = ?"
         params.append(dice)
 
-    with get_connection() as conn:
+    with connection() as conn:
         cur = conn.execute(query, params)
         rows = cur.fetchall()
         return [_row_to_database_record(row) for row in rows]
 
 
 def clear_rolls(*, reset_ids: bool = False, vacuum: bool = True) -> int:
-    with get_connection() as conn:
+    with connection() as conn:
         cur = conn.execute("SELECT COUNT(*) AS count FROM rolls")
         row = cur.fetchone()
         count = int(row["count"]) if row else 0
@@ -191,7 +198,7 @@ def clear_rolls(*, reset_ids: bool = False, vacuum: bool = True) -> int:
             conn.execute("DELETE FROM sqlite_sequence WHERE name = 'rolls'")
 
     if vacuum and count > 0:
-        with get_connection() as conn:
+        with connection() as conn:
             conn.execute("VACUUM")
 
     return count
@@ -209,7 +216,7 @@ def count_rolls(*, sides: int | None = None, dice: int | None = None) -> int:
         query += " AND dice = ?"
         params.append(dice)
 
-    with get_connection() as conn:
+    with connection() as conn:
         cur = conn.execute(query, params)
         row = cur.fetchone()
         return int(row["count"]) if row else 0
@@ -236,7 +243,7 @@ def paginated_rolls(
     query += " ORDER BY id DESC LIMIT ? OFFSET ?"
     params.extend([limit, offset])
 
-    with get_connection() as conn:
+    with connection() as conn:
         cur = conn.execute(query, params)
         rows = cur.fetchall()
         return [_row_to_database_record(row) for row in rows]
@@ -256,14 +263,14 @@ def paginated_rolls_by_session(
         LIMIT ? OFFSET ?
     """
 
-    with get_connection() as conn:
+    with connection() as conn:
         cur = conn.execute(query, (game_session_id, limit, offset))
         rows = cur.fetchall()
         return [_row_to_database_record(row) for row in rows]
 
 
 def clear_rolls_by_session(game_session_id: str) -> int:
-    with get_connection() as conn:
+    with connection() as conn:
         deleted = conn.execute(
             "DELETE FROM rolls WHERE game_session_id = ?",
             (game_session_id,),
@@ -285,7 +292,7 @@ def session_stats(game_session_id: str) -> SessionStatsRecord:
     WHERE game_session_id = ?
     """
 
-    with get_connection() as conn:
+    with connection() as conn:
         cur = conn.execute(query, (game_session_id,))
         row = cur.fetchone()
 
@@ -326,7 +333,7 @@ def overall_stats() -> OverallStatsRecord:
     FROM rolls
     """
 
-    with get_connection() as conn:
+    with connection() as conn:
         cur = conn.execute(query)
         row = cur.fetchone()
 
@@ -362,7 +369,7 @@ def create_game_session() -> GameSessionRecord:
     session_id = str(uuid.uuid4())
     now = utc_now_iso()
 
-    with get_connection() as conn:
+    with connection() as conn:
         conn.execute(
             """
             INSERT INTO game_sessions (
@@ -387,7 +394,7 @@ def create_game_session() -> GameSessionRecord:
 
 
 def get_game_session(session_id: str) -> GameSessionRecord | None:
-    with get_connection() as conn:
+    with connection() as conn:
         row = conn.execute(
             """
             SELECT
@@ -411,7 +418,7 @@ def get_game_session(session_id: str) -> GameSessionRecord | None:
 def update_game_session_points(session_id: str, player_points: int) -> None:
     now = utc_now_iso()
 
-    with get_connection() as conn:
+    with connection() as conn:
         conn.execute(
             """
             UPDATE game_sessions
@@ -423,7 +430,7 @@ def update_game_session_points(session_id: str, player_points: int) -> None:
 
 
 def delete_game_session(session_id: str) -> int:
-    with get_connection() as conn:
+    with connection() as conn:
         deleted = conn.execute(
             "DELETE FROM game_sessions WHERE id = ?",
             (session_id,),
@@ -456,7 +463,7 @@ def export_rolls_to_csv(file_path: str | None = None) -> int:
         ORDER BY id DESC
     """
 
-    with get_connection() as conn:
+    with connection() as conn:
         cur = conn.execute(query)
         rows = cur.fetchall()
 
@@ -515,7 +522,7 @@ def export_rolls_to_csv_by_session(
         ORDER BY id DESC
     """
 
-    with get_connection() as conn:
+    with connection() as conn:
         cur = conn.execute(query, (game_session_id,))
         rows = cur.fetchall()
 
@@ -548,7 +555,7 @@ def export_rolls_to_csv_by_session(
 def reset_game_session(session_id: str) -> None:
     now = utc_now_iso()
 
-    with get_connection() as conn:
+    with connection() as conn:
         conn.execute(
             """
             UPDATE game_sessions

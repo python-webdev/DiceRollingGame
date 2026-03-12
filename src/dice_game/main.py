@@ -33,6 +33,7 @@ from .storage.sqlite_storage import (
 from .storage.sqlite_storage import (
     clear_rolls,
     count_rolls,
+    create_game_session,
     export_rolls_to_csv,
     init_db,
     paginated_rolls,
@@ -44,7 +45,7 @@ from .storage.sqlite_storage import (
 
 
 def play_turn(state: TurnState) -> TurnOutcome:
-    context = get_roll_context()
+    context = get_roll_context(state.game_session_id)
     rolls = roll_dice(context)
 
     temp_result = build_temp_result(context, rolls, state.player_points)
@@ -147,8 +148,12 @@ def run_history_menu() -> None:
 def main() -> None:
     init_db()
 
+    # Create a new game session
+    session = create_game_session()
+
     state = TurnState(
         game_config=GameConfig(),
+        game_session_id=session["id"],
         stats=Stats(),
         player_points=0,
     )
@@ -159,7 +164,7 @@ def main() -> None:
         action = ask_menu_action()
 
         if action == "s":
-            context = get_roll_context()
+            context = get_roll_context(state.game_session_id)
 
             trials = ask_simulation_trials()
             report = simulate(

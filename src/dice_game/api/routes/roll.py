@@ -45,6 +45,7 @@ def roll(game_session_id: str, request: RollRequest):
     )
 
     state = TurnState(
+        game_session_id=game_session_id,
         game_config=GameConfig(),
         stats=Stats(),
         player_points=session["player_points"],

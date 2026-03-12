@@ -21,18 +21,51 @@ def test_paginated_rolls_returns_remaining_rows_on_last_page(tmp_path, monkeypat
     sqlite_storage.init_db()
 
     # Insert 11 fake rows
-    with sqlite_storage.get_connection() as conn:
+    with sqlite_storage.connection() as conn:
+        # First create all the game sessions to satisfy foreign key constraints
+        for i in range(11):
+            conn.execute(
+                """
+                INSERT INTO game_sessions (
+                    id,
+                    player_points,
+                    status,
+                    created_at,
+                    updated_at
+                )
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    f"test-session-{i}",
+                    0,
+                    "active",
+                    f"2026-03-08T09:59:{i:02d}+00:00",
+                    f"2026-03-08T10:00:{i:02d}+00:00",
+                ),
+            )
+
+        # Now insert the rolls
         for i in range(11):
             conn.execute(
                 """
                 INSERT INTO rolls (
-                    time, mode, dice, dice_type, sides,
-                    rolls, total, match, outcome,
-                    points_delta, points_total
+                        game_session_id,
+                        time,
+                        mode,
+                        dice,
+                        dice_type,
+                        sides,
+                        rolls,
+                        total,
+                        has_match,
+                        outcome,
+                        points_delta,
+                        points_total                    
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
+                    f"test-session-{i}",
                     f"2026-03-08T10:00:{i:02d}+00:00",
                     "CLASSIC",
                     2,

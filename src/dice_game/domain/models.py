@@ -55,6 +55,7 @@ class RollResult:
 @dataclass
 class TurnState:
     game_config: GameConfig
+    game_session_id: str
     player_points: int = 0
     stats: Stats | None = None
 

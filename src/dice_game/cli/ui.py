@@ -62,13 +62,19 @@ def choose_dice_type() -> str:
         print("\nInvalid dice type. Please select a valid dice type.\n")
 
 
-def get_roll_context():
+def get_roll_context(game_session_id: str):
 
     num_dice = ask_int("How many dice would you like to roll? ", min_value=MIN_DICE)
     mode = choose_mode()
     dice_type = choose_dice_type()
     sides = DICE_TYPES[dice_type]
-    return RollContext(mode=mode, dice_type=dice_type, num_dice=num_dice, sides=sides)
+    return RollContext(
+        game_session_id=game_session_id,
+        mode=mode,
+        dice_type=dice_type,
+        num_dice=num_dice,
+        sides=sides,
+    )
 
 
 # -------- Menu Asking --------

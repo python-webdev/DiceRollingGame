@@ -12,6 +12,7 @@ from dice_game.services.logic import (
 def test_roll_result_total():
 
     context = RollContext(
+        game_session_id="test-session",
         mode=GameMode.CLASSIC,
         dice_type="D6",
         num_dice=2,
@@ -26,7 +27,13 @@ def test_roll_result_total():
 
 
 def test_match_detection():
-    context = RollContext(GameMode.CLASSIC, "D6", 2, 6)
+    context = RollContext(
+        game_session_id="test-session",
+        mode=GameMode.CLASSIC,
+        dice_type="D6",
+        num_dice=2,
+        sides=6,
+    )
 
     result = RollResult(context, [5, 5], "win", 5, 5)
 
@@ -34,7 +41,13 @@ def test_match_detection():
 
 
 def test_no_match():
-    context = RollContext(GameMode.CLASSIC, "D6", 2, 6)
+    context = RollContext(
+        game_session_id="test-session",
+        mode=GameMode.CLASSIC,
+        dice_type="D6",
+        num_dice=2,
+        sides=6,
+    )
 
     result = RollResult(context, [2, 4], "draw", 0, 0)
 
@@ -44,11 +57,13 @@ def test_no_match():
 def test_lucky_mode_match_grants_extra_turn():
     state = TurnState(
         game_config=GameConfig(),
+        game_session_id="test-session",
         stats=Stats(),
         player_points=0,
     )
 
     context = RollContext(
+        game_session_id="test-session",
         mode=GameMode.LUCKY,
         dice_type="D6",
         num_dice=2,

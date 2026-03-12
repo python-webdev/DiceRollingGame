@@ -36,17 +36,49 @@ def test_csv_export_contains_expected_rows(tmp_path, monkeypatch):
     monkeypatch.setattr(sqlite_storage, "DB_PATH", db_path)
     sqlite_storage.init_db()
 
-    with sqlite_storage.get_connection() as conn:
+    with sqlite_storage.connection() as conn:
+        # Create the game session first to satisfy foreign key constraint
+        conn.execute(
+            """
+            INSERT INTO game_sessions (
+                id,
+                player_points,
+                status,
+                created_at,
+                updated_at
+            )
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (
+                "test-session-1",
+                10,
+                "active",
+                "2026-03-08T09:59:00+00:00",
+                "2026-03-08T10:00:00+00:00",
+            ),
+        )
+
+        # Now insert the roll
         conn.execute(
             """
             INSERT INTO rolls (
-                time, mode, dice, dice_type, sides,
-                rolls, total, match, outcome,
-                points_delta, points_total
+                  game_session_id,
+                time,
+                mode,
+                dice,
+                dice_type,
+                sides,
+                rolls,
+                total,
+                has_match,
+                outcome,
+                points_delta,
+                points_total
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
+                "test-session-1",
                 "2026-03-08T10:00:00+00:00",
                 "LUCKY",
                 2,
@@ -66,10 +98,11 @@ def test_csv_export_contains_expected_rows(tmp_path, monkeypatch):
 
     assert exported == 1
     assert (
-        "id,time,mode,dice,dice_type,sides,rolls,total,match,outcome,points_delta,points_total"
+        "id,game_session_id,time,mode,dice,dice_type,sides,rolls,total,has_match,outcome,points_delta,points_total"
         in text
     )
     assert "LUCKY" in text
     assert "D8" in text
     assert "[8, 8]" in text
     assert "16" in text
+    assert "1" in text
