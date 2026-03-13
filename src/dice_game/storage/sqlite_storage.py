@@ -56,7 +56,6 @@ def connection() -> Iterator[sqlite3.Connection]:
         conn.close()
 
 
-
 def _column_exists(conn: sqlite3.Connection, table_name: str, column_name: str) -> bool:
     rows = conn.execute(f"PRAGMA table_info({table_name})").fetchall()
     return any(row["name"] == column_name for row in rows)
@@ -553,6 +552,20 @@ def export_rolls_to_csv_by_session(
 
 
 def reset_game_session(session_id: str) -> None:
+    now = utc_now_iso()
+
+    with connection() as conn:
+        conn.execute(
+            """
+            UPDATE game_sessions
+            SET player_points = ?, updated_at = ?
+            WHERE id = ?
+            """,
+            (0, now, session_id),
+        )
+
+
+def reset_game_session_points(session_id: str) -> None:
     now = utc_now_iso()
 
     with connection() as conn:

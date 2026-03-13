@@ -224,3 +224,114 @@ def test_delete_history_clears_only_that_sessions_rolls(client: TestClient) -> N
     assert history_b.status_code == 200
     assert history_a.json() == []
     assert len(history_b.json()) == 1
+
+
+def test_get_history_with_invalid_session_returns_404(client: TestClient) -> None:
+    response = client.get("/sessions/not-a-real-session/history")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Game session not found"
+
+
+def test_delete_history_with_invalid_session_returns_404(client: TestClient) -> None:
+    response = client.delete("/sessions/not-a-real-session/history")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Game session not found"
+
+
+def test_export_with_invalid_session_returns_404(client: TestClient) -> None:
+    response = client.get("/sessions/not-a-real-session/history/export")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Game session not found"
+
+
+def test_export_history_returns_404_when_session_has_no_rolls(
+    client: TestClient,
+) -> None:
+    session_id = create_session(client)
+
+    response = client.get(f"/sessions/{session_id}/history/export")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "No rolls to export"
+
+
+def test_export_history_success(client: TestClient) -> None:
+    session_id = create_session(client)
+
+    client.post(
+        f"/sessions/{session_id}/roll",
+        json={"mode": "classic", "dice_type": "D6", "num_dice": 2},
+    )
+
+    response = client.get(f"/sessions/{session_id}/history/export")
+
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["records"] == 1
+    assert data["file"] == f"roll_history_{session_id}.csv"
+
+
+def test_get_session_with_invalid_id_returns_404(client: TestClient) -> None:
+    response = client.get("/sessions/not-a-real-session")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Game session not found"
+
+
+def test_delete_session_with_invalid_id_returns_404(client: TestClient) -> None:
+    response = client.delete("/sessions/not-a-real-session")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Game session not found"
+
+
+def test_stats_with_invalid_session_returns_404(client: TestClient) -> None:
+    response = client.get("/sessions/not-a-real-session/stats")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Game session not found"
+
+
+def test_history_rejects_negative_offset(client: TestClient) -> None:
+    session_id = create_session(client)
+
+    response = client.get(f"/sessions/{session_id}/history?offset=-1")
+
+    assert response.status_code == 422
+
+
+def test_history_rejects_invalid_limit(client: TestClient) -> None:
+    session_id = create_session(client)
+
+    response = client.get(f"/sessions/{session_id}/history?limit=0")
+
+    assert response.status_code == 422
+
+
+def test_delete_history_resets_points_and_clears_rolls(client: TestClient) -> None:
+    session_id = create_session(client)
+
+    roll_response = client.post(
+        f"/sessions/{session_id}/roll",
+        json={"mode": "classic", "dice_type": "D6", "num_dice": 2},
+    )
+    assert roll_response.status_code == 200
+
+    delete_response = client.delete(f"/sessions/{session_id}/history")
+    assert delete_response.status_code == 200
+
+    delete_data = delete_response.json()
+    assert delete_data["deleted_records"] == 1
+    assert delete_data["player_points"] == 0
+
+    history_response = client.get(f"/sessions/{session_id}/history")
+    assert history_response.status_code == 200
+    assert history_response.json() == []
+
+    session_response = client.get(f"/sessions/{session_id}")
+    assert session_response.status_code == 200
+    assert session_response.json()["player_points"] == 0

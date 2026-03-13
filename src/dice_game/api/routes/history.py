@@ -5,7 +5,7 @@ from ...storage.sqlite_storage import (
     export_rolls_to_csv_by_session,
     get_game_session,
     paginated_rolls_by_session,
-    reset_game_session,
+    reset_game_session_points,
 )
 
 router = APIRouter(prefix="/sessions", tags=["history"])
@@ -35,7 +35,7 @@ def delete_history(game_session_id: str):
         raise HTTPException(status_code=404, detail="Game session not found")
 
     deleted = clear_rolls_by_session(game_session_id)
-    reset_game_session(game_session_id)
+    reset_game_session_points(game_session_id)
 
     return {
         "deleted_records": deleted,
