@@ -1,21 +1,13 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
 
 from ...storage.sqlite_storage import (
     create_game_session,
     delete_game_session,
     get_game_session,
 )
+from ..schemas import DeleteSessionResponse, SessionResponse
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
-
-
-class SessionResponse(BaseModel):
-    game_session_id: str
-    player_points: int
-    status: str
-    created_at: str
-    updated_at: str
 
 
 @router.post("", response_model=SessionResponse)
@@ -45,10 +37,10 @@ def get_session(game_session_id: str):
     )
 
 
-@router.delete("/{game_session_id}")
+@router.delete("/{game_session_id}", response_model=DeleteSessionResponse)
 def delete_session(game_session_id: str):
     deleted = delete_game_session(game_session_id)
     if deleted == 0:
         raise HTTPException(status_code=404, detail="Game session not found")
 
-    return {"deleted": True}
+    return DeleteSessionResponse(deleted=True)

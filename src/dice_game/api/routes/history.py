@@ -7,11 +7,12 @@ from ...storage.sqlite_storage import (
     paginated_rolls_by_session,
     reset_game_session_points,
 )
+from ..schemas import DeleteHistoryResponse, ExportHistoryResponse, HistoryItemResponse
 
 router = APIRouter(prefix="/sessions", tags=["history"])
 
 
-@router.get("/{game_session_id}/history")
+@router.get("/{game_session_id}/history", response_model=list[HistoryItemResponse])
 def get_history(
     game_session_id: str,
     limit: int = Query(default=10, ge=1, le=100),
@@ -28,7 +29,7 @@ def get_history(
     )
 
 
-@router.delete("/{game_session_id}/history")
+@router.delete("/{game_session_id}/history", response_model=DeleteHistoryResponse)
 def delete_history(game_session_id: str):
     session = get_game_session(game_session_id)
     if session is None:
@@ -37,13 +38,13 @@ def delete_history(game_session_id: str):
     deleted = clear_rolls_by_session(game_session_id)
     reset_game_session_points(game_session_id)
 
-    return {
-        "deleted_records": deleted,
-        "player_points": 0,
-    }
+    return DeleteHistoryResponse(
+        deleted_records=deleted,
+        player_points=0,
+    )
 
 
-@router.get("/{game_session_id}/history/export")
+@router.get("/{game_session_id}/history/export", response_model=ExportHistoryResponse)
 def export_history(game_session_id: str):
     session = get_game_session(game_session_id)
     if session is None:
@@ -54,8 +55,8 @@ def export_history(game_session_id: str):
     if exported == 0:
         raise HTTPException(status_code=404, detail="No rolls to export")
 
-    return {
-        "message": f"Exported {exported} rolls to CSV file",
-        "records": exported,
-        "file": f"roll_history_{game_session_id}.csv",
-    }
+    return ExportHistoryResponse(
+        message=f"Exported {exported} rolls to CSV file",
+        records=exported,
+        file=f"roll_history_{game_session_id}.csv",
+    )

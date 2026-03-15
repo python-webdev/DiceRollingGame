@@ -17,12 +17,12 @@ from ...storage.sqlite_storage import (
     save_roll,
     update_game_session_points,
 )
-from ..schemas import RollRequest
+from ..schemas import RollRequest, RollResponse
 
 router = APIRouter(prefix="/sessions", tags=["roll"])
 
 
-@router.post("/{game_session_id}/roll")
+@router.post("/{game_session_id}/roll", response_model=RollResponse)
 def roll(game_session_id: str, request: RollRequest):
     session = get_game_session(game_session_id)
     if session is None:
@@ -60,12 +60,12 @@ def roll(game_session_id: str, request: RollRequest):
     update_game_session_points(game_session_id, result.points_total)
     save_roll(result)
 
-    return {
-        "game_session_id": game_session_id,
-        "rolls": result.rolls,
-        "total": result.total,
-        "outcome": result.outcome,
-        "points_delta": result.points_delta,
-        "points_total": result.points_total,
-        "extra_turn": extra_turn,
-    }
+    return RollResponse(
+        game_session_id=game_session_id,
+        rolls=result.rolls,
+        total=result.total,
+        outcome=result.outcome,
+        points_delta=result.points_delta,
+        points_total=result.points_total,
+        extra_turn=extra_turn,
+    )
