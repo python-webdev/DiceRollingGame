@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from ...storage.sqlite_storage import (
+from ...storage.session_repository import (
     create_game_session,
     delete_game_session,
     get_game_session,

@@ -1,11 +1,12 @@
-from dice_game.storage import sqlite_storage
+from dice_game.storage.connection import init_db
+from dice_game.storage.roll_repository import count_rolls
 
 
 def test_empty_database_has_zero_rows(tmp_path, monkeypatch):
     db_path = tmp_path / "test.db"
 
-    monkeypatch.setattr(sqlite_storage, "DB_PATH", db_path)
+    monkeypatch.setattr("dice_game.storage.connection.DB_PATH", db_path)
 
-    sqlite_storage.init_db()
+    init_db()
 
-    assert sqlite_storage.count_rolls() == 0
+    assert count_rolls() == 0

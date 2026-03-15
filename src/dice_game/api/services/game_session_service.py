@@ -11,9 +11,9 @@ from dice_game.services.logic import (
     resolve_turn,
     roll_dice,
 )
-from dice_game.storage.sqlite_storage import (
+from dice_game.storage.roll_repository import save_roll
+from dice_game.storage.session_repository import (
     get_game_session,
-    save_roll,
     update_game_session_points,
 )
 

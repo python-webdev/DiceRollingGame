@@ -1,5 +1,5 @@
-from dice_game.storage import sqlite_storage
-from dice_game.storage.sqlite_storage import paginated_rolls
+from dice_game.storage.connection import connection, init_db
+from dice_game.storage.roll_repository import paginated_rolls
 
 
 def test_first_page_returns_rows():
@@ -17,11 +17,11 @@ def test_offset_beyond_rows_returns_empty():
 def test_paginated_rolls_returns_remaining_rows_on_last_page(tmp_path, monkeypatch):
 
     db_path = tmp_path / "test.db"
-    monkeypatch.setattr(sqlite_storage, "DB_PATH", db_path)
-    sqlite_storage.init_db()
+    monkeypatch.setattr("dice_game.storage.connection.DB_PATH", db_path)
+    init_db()
 
     # Insert 11 fake rows
-    with sqlite_storage.connection() as conn:
+    with connection() as conn:
         # First create all the game sessions to satisfy foreign key constraints
         for i in range(11):
             conn.execute(
@@ -80,8 +80,8 @@ def test_paginated_rolls_returns_remaining_rows_on_last_page(tmp_path, monkeypat
                 ),
             )
 
-    page_1 = sqlite_storage.paginated_rolls(limit=10, offset=0)
-    page_2 = sqlite_storage.paginated_rolls(limit=10, offset=10)
+    page_1 = paginated_rolls(limit=10, offset=0)
+    page_2 = paginated_rolls(limit=10, offset=10)
 
     assert len(page_1) == 10
     assert len(page_2) == 1

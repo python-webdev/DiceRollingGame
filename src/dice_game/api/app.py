@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from ..storage.sqlite_storage import init_db
+from ..storage.connection import init_db
 from .routes.history import router as history_router
 from .routes.roll import router as roll_router
 from .routes.sessions import router as sessions_router

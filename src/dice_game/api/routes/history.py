@@ -1,12 +1,11 @@
 from fastapi import APIRouter, HTTPException, Query
 
-from ...storage.sqlite_storage import (
+from ...storage.roll_repository import (
     clear_rolls_by_session,
     export_rolls_to_csv_by_session,
-    get_game_session,
     paginated_rolls_by_session,
-    reset_game_session_points,
 )
+from ...storage.session_repository import get_game_session, reset_game_session_points
 from ..schemas import DeleteHistoryResponse, ExportHistoryResponse, HistoryItemResponse
 
 router = APIRouter(prefix="/sessions", tags=["history"])

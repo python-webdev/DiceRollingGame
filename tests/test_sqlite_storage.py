@@ -1,12 +1,22 @@
 from dice_game.domain.models import RollContext, RollResult
 from dice_game.domain.modes import GameMode
-from dice_game.storage import sqlite_storage
+from dice_game.storage.roll_repository import (
+    clear_rolls_by_session,
+    paginated_rolls_by_session,
+    save_roll,
+    session_stats,
+)
+from dice_game.storage.session_repository import (
+    create_game_session,
+    get_game_session,
+    update_game_session_points,
+)
 
 
 def test_create_and_get_game_session() -> None:
-    session = sqlite_storage.create_game_session()
+    session = create_game_session()
 
-    fetched = sqlite_storage.get_game_session(session["id"])
+    fetched = get_game_session(session["id"])
 
     assert fetched is not None
     assert fetched["id"] == session["id"]
@@ -15,18 +25,18 @@ def test_create_and_get_game_session() -> None:
 
 
 def test_update_game_session_points() -> None:
-    session = sqlite_storage.create_game_session()
+    session = create_game_session()
 
-    sqlite_storage.update_game_session_points(session["id"], 12)
+    update_game_session_points(session["id"], 12)
 
-    fetched = sqlite_storage.get_game_session(session["id"])
+    fetched = get_game_session(session["id"])
 
     assert fetched is not None
     assert fetched["player_points"] == 12
 
 
 def test_save_roll_and_paginated_rolls_by_session() -> None:
-    session = sqlite_storage.create_game_session()
+    session = create_game_session()
 
     context = RollContext(
         game_session_id=session["id"],
@@ -43,9 +53,9 @@ def test_save_roll_and_paginated_rolls_by_session() -> None:
         points_total=0,
     )
 
-    sqlite_storage.save_roll(result)
+    save_roll(result)
 
-    rows = sqlite_storage.paginated_rolls_by_session(
+    rows = paginated_rolls_by_session(
         session["id"],
         limit=10,
         offset=0,
@@ -58,7 +68,7 @@ def test_save_roll_and_paginated_rolls_by_session() -> None:
 
 
 def test_session_stats() -> None:
-    session = sqlite_storage.create_game_session()
+    session = create_game_session()
 
     first = RollResult(
         context=RollContext(
@@ -87,10 +97,10 @@ def test_session_stats() -> None:
         points_total=2,
     )
 
-    sqlite_storage.save_roll(first)
-    sqlite_storage.save_roll(second)
+    save_roll(first)
+    save_roll(second)
 
-    stats = sqlite_storage.session_stats(session["id"])
+    stats = session_stats(session["id"])
 
     assert stats["total_rolls"] == 2
     assert stats["total_roll_value"] == 9
@@ -100,7 +110,7 @@ def test_session_stats() -> None:
 
 
 def test_clear_rolls_by_session() -> None:
-    session = sqlite_storage.create_game_session()
+    session = create_game_session()
 
     result = RollResult(
         context=RollContext(
@@ -116,10 +126,10 @@ def test_clear_rolls_by_session() -> None:
         points_total=0,
     )
 
-    sqlite_storage.save_roll(result)
+    save_roll(result)
 
-    deleted = sqlite_storage.clear_rolls_by_session(session["id"])
-    rows = sqlite_storage.paginated_rolls_by_session(session["id"], limit=10, offset=0)
+    deleted = clear_rolls_by_session(session["id"])
+    rows = paginated_rolls_by_session(session["id"], limit=10, offset=0)
 
     assert deleted == 1
     assert rows == []

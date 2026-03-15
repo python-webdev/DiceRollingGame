@@ -27,21 +27,21 @@ from .services.logic import (
     roll_dice,
 )
 from .services.simulation import simulate
-from .storage.sqlite_storage import (
+from .storage.connection import init_db
+from .storage.roll_repository import (
     best_roll as best_roll_db,
 )
-from .storage.sqlite_storage import (
+from .storage.roll_repository import (
     clear_rolls,
     count_rolls,
-    create_game_session,
     export_rolls_to_csv,
-    init_db,
     paginated_rolls,
     save_roll,
 )
-from .storage.sqlite_storage import (
+from .storage.roll_repository import (
     overall_stats as overall_stats_db,
 )
+from .storage.session_repository import create_game_session
 
 
 def play_turn(state: TurnState) -> TurnOutcome:

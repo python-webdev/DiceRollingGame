@@ -1,15 +1,15 @@
-from dice_game.storage import sqlite_storage
-from dice_game.storage.sqlite_storage import export_rolls_to_csv
+from dice_game.storage import roll_repository
+from dice_game.storage.connection import connection, init_db
 
 
 def test_csv_export_creates_file(tmp_path, monkeypatch):
     db_path = tmp_path / "test.db"
     csv_path = tmp_path / "rolls_export.csv"
 
-    monkeypatch.setattr(sqlite_storage, "DB_PATH", db_path)
-    sqlite_storage.init_db()
+    monkeypatch.setattr("dice_game.storage.connection.DB_PATH", db_path)
+    init_db()
 
-    sqlite_storage.export_rolls_to_csv(str(csv_path))
+    roll_repository.export_rolls_to_csv(str(csv_path))
 
     assert csv_path.exists()
 
@@ -18,10 +18,10 @@ def test_csv_contains_headers(tmp_path, monkeypatch):
     db_path = tmp_path / "test.db"
     csv_path = tmp_path / "rolls_export.csv"
 
-    monkeypatch.setattr(sqlite_storage, "DB_PATH", db_path)
-    sqlite_storage.init_db()
+    monkeypatch.setattr("dice_game.storage.connection.DB_PATH", db_path)
+    init_db()
 
-    export_rolls_to_csv(str(csv_path))
+    roll_repository.export_rolls_to_csv(str(csv_path))
 
     test = csv_path.read_text()
 
@@ -33,10 +33,10 @@ def test_csv_export_contains_expected_rows(tmp_path, monkeypatch):
     db_path = tmp_path / "test.db"
     csv_path = tmp_path / "rolls_export.csv"
 
-    monkeypatch.setattr(sqlite_storage, "DB_PATH", db_path)
-    sqlite_storage.init_db()
+    monkeypatch.setattr("dice_game.storage.connection.DB_PATH", db_path)
+    init_db()
 
-    with sqlite_storage.connection() as conn:
+    with connection() as conn:
         # Create the game session first to satisfy foreign key constraint
         conn.execute(
             """
@@ -93,7 +93,7 @@ def test_csv_export_contains_expected_rows(tmp_path, monkeypatch):
             ),
         )
 
-    exported = sqlite_storage.export_rolls_to_csv(str(csv_path))
+    exported = roll_repository.export_rolls_to_csv(str(csv_path))
     text = csv_path.read_text(encoding="utf-8")
 
     assert exported == 1

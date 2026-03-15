@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
-from ...storage.sqlite_storage import get_game_session, session_stats
+from ...storage.session_repository import get_game_session
+from ...storage.roll_repository import session_stats
 from ..schemas import StatsResponse
 
 router = APIRouter(prefix="/sessions", tags=["stats"])
