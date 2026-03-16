@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
+from ...services.exceptions import GameSessionNotFoundError
 from ...storage.session_repository import (
     create_game_session,
     delete_game_session,
@@ -25,8 +26,11 @@ def create_session():
 @router.get("/{game_session_id}", response_model=SessionResponse)
 def get_session(game_session_id: str):
     session = get_game_session(game_session_id)
-    if session is None:
-        raise HTTPException(status_code=404, detail="Game session not found")
+    try:
+        if session is None:
+            raise GameSessionNotFoundError("Game session not found")
+    except GameSessionNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
     return SessionResponse(
         game_session_id=session["id"],
@@ -39,8 +43,11 @@ def get_session(game_session_id: str):
 
 @router.delete("/{game_session_id}", response_model=DeleteSessionResponse)
 def delete_session(game_session_id: str):
-    deleted = delete_game_session(game_session_id)
-    if deleted == 0:
-        raise HTTPException(status_code=404, detail="Game session not found")
+    try:
+        deleted = delete_game_session(game_session_id)
+        if deleted == 0:
+            raise GameSessionNotFoundError("Game session not found")
+    except GameSessionNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
     return DeleteSessionResponse(deleted=True)

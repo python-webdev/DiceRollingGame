@@ -1,5 +1,9 @@
 from fastapi import APIRouter, HTTPException, Query
 
+from ...services.exceptions import (
+    GameSessionNotFoundError,
+    HistoryExportError,
+)
 from ...services.history_service import clear_session_history
 from ...storage.roll_repository import (
     export_rolls_to_csv_by_session,
@@ -18,8 +22,11 @@ def get_history(
     offset: int = Query(default=0, ge=0),
 ):
     session = get_game_session(game_session_id)
-    if session is None:
-        raise HTTPException(status_code=404, detail="Game session not found")
+    try:
+        if session is None:
+            raise GameSessionNotFoundError("Game session not found")
+    except GameSessionNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
     return paginated_rolls_by_session(
         game_session_id,
@@ -33,24 +40,26 @@ def delete_history(game_session_id: str):
     try:
         result = clear_session_history(game_session_id)
         return result
-    except ValueError as e:
-        error_message = str(e)
-        if error_message == "Game session not found":
-            raise HTTPException(status_code=404, detail=error_message) from e
-
-        raise HTTPException(status_code=500, detail="Internal server error") from e
+    except GameSessionNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
 
 @router.get("/{game_session_id}/history/export", response_model=ExportHistoryResponse)
 def export_history(game_session_id: str):
     session = get_game_session(game_session_id)
-    if session is None:
-        raise HTTPException(status_code=404, detail="Game session not found")
+    try:
+        if session is None:
+            raise GameSessionNotFoundError("Game session not found")
+    except GameSessionNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
     exported = export_rolls_to_csv_by_session(game_session_id)
 
-    if exported == 0:
-        raise HTTPException(status_code=404, detail="No rolls to export")
+    try:
+        if exported == 0:
+            raise HistoryExportError("No rolls to export")
+    except HistoryExportError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
     return ExportHistoryResponse(
         message=f"Exported {exported} rolls to CSV file",

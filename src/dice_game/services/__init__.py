@@ -1,3 +1,10 @@
+from .exceptions import (
+    GameSessionNotFoundError,
+    HistoryExportError,
+    InvalidDiceTypeError,
+    InvalidGameModeError,
+    InternalServerError,
+)
 from .game_session_service import play_session_turn
 from .logic import (
     apply_turn_effects,
@@ -17,6 +24,11 @@ from .simulation import (
 )
 
 __all__ = [
+    "InvalidDiceTypeError",
+    "InvalidGameModeError",
+    "GameSessionNotFoundError",
+    "HistoryExportError",
+    "InternalServerError",
     "roll_dice",
     "determine_outcome",
     "points_for_turn",

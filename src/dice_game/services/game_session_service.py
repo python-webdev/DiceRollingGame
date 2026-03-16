@@ -17,6 +17,12 @@ from dice_game.storage.session_repository import (
     update_game_session_points,
 )
 
+from .exceptions import (
+    GameSessionNotFoundError,
+    InvalidDiceTypeError,
+    InvalidGameModeError,
+)
+
 
 def play_session_turn(
     *,
@@ -27,15 +33,15 @@ def play_session_turn(
 ) -> RollResponse:
     session = get_game_session(game_session_id)
     if session is None:
-        raise ValueError("Game session not found")
+        raise GameSessionNotFoundError("Game session not found")
 
     if dice_type not in DICE_TYPES:
-        raise ValueError("Invalid dice type")
+        raise InvalidDiceTypeError("Invalid dice type")
 
     try:
         mode = GameMode[mode_name.upper()]
     except KeyError as exc:
-        raise ValueError("Invalid game mode") from exc
+        raise InvalidGameModeError("Invalid game mode") from exc
 
     context = RollContext(
         game_session_id=game_session_id,
