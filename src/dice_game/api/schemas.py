@@ -1,9 +1,26 @@
+from enum import Enum
+
 from pydantic import BaseModel, Field
 
 
+class GameModeInput(str, Enum):
+    classic = "classic"
+    lucky = "lucky"
+    risk = "risk"
+
+
+class DiceTypeInput(str, Enum):
+    d4 = "D4"
+    d6 = "D6"
+    d8 = "D8"
+    d10 = "D10"
+    d12 = "D12"
+    d20 = "D20"
+
+
 class RollRequest(BaseModel):
-    mode: str
-    dice_type: str
+    mode: GameModeInput
+    dice_type: DiceTypeInput
     num_dice: int = Field(ge=2)
 
 

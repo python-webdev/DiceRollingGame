@@ -18,8 +18,8 @@ def roll(game_session_id: str, request: RollRequest):
     try:
         result = play_session_turn(
             game_session_id=game_session_id,
-            mode_name=request.mode,
-            dice_type=request.dice_type,
+            mode_name=request.mode.value,
+            dice_type=request.dice_type.value,
             num_dice=request.num_dice,
         )
         return result

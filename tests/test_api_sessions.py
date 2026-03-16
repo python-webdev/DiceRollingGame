@@ -106,7 +106,7 @@ def test_roll_with_invalid_session_returns_404(client: TestClient) -> None:
     assert response.json()["detail"] == "Game session not found"
 
 
-def test_roll_with_invalid_dice_type_returns_400(client: TestClient) -> None:
+def test_roll_with_invalid_dice_type_returns_422(client: TestClient) -> None:
     session_id = create_session(client)
 
     response = client.post(
@@ -118,11 +118,10 @@ def test_roll_with_invalid_dice_type_returns_400(client: TestClient) -> None:
         },
     )
 
-    assert response.status_code == 400
-    assert response.json()["detail"] == "Invalid dice type"
+    assert response.status_code == 422
 
 
-def test_roll_with_invalid_mode_returns_400(client: TestClient) -> None:
+def test_roll_with_invalid_mode_returns_422(client: TestClient) -> None:
     session_id = create_session(client)
 
     response = client.post(
@@ -134,8 +133,7 @@ def test_roll_with_invalid_mode_returns_400(client: TestClient) -> None:
         },
     )
 
-    assert response.status_code == 400
-    assert response.json()["detail"] == "Invalid game mode"
+    assert response.status_code == 422
 
 
 def test_history_returns_only_that_sessions_rolls(client: TestClient) -> None:
