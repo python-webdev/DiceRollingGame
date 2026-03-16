@@ -1,12 +1,13 @@
 from fastapi import APIRouter, HTTPException
 
-from ..schemas import RollRequest
-from ..services.game_session_service import play_session_turn
+from dice_game.services.game_session_service import play_session_turn
+
+from ..schemas import RollRequest, RollResponse
 
 router = APIRouter(prefix="/sessions", tags=["roll"])
 
 
-@router.post("/{game_session_id}/roll")
+@router.post("/{game_session_id}/roll", response_model=RollResponse)
 def roll(game_session_id: str, request: RollRequest):
     try:
         result = play_session_turn(

@@ -1,3 +1,4 @@
+from .game_session_service import play_session_turn
 from .logic import (
     apply_turn_effects,
     build_temp_result,
@@ -28,4 +29,5 @@ __all__ = [
     "SimulationAverages",
     "SimulationReport",
     "simulate",
+    "play_session_turn",
 ]

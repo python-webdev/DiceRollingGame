@@ -1,11 +1,11 @@
 from fastapi import APIRouter, HTTPException, Query
 
+from ...services.history_service import clear_session_history
 from ...storage.roll_repository import (
-    clear_rolls_by_session,
     export_rolls_to_csv_by_session,
     paginated_rolls_by_session,
 )
-from ...storage.session_repository import get_game_session, reset_game_session_points
+from ...storage.session_repository import get_game_session
 from ..schemas import DeleteHistoryResponse, ExportHistoryResponse, HistoryItemResponse
 
 router = APIRouter(prefix="/sessions", tags=["history"])
@@ -30,17 +30,15 @@ def get_history(
 
 @router.delete("/{game_session_id}/history", response_model=DeleteHistoryResponse)
 def delete_history(game_session_id: str):
-    session = get_game_session(game_session_id)
-    if session is None:
-        raise HTTPException(status_code=404, detail="Game session not found")
+    try:
+        result = clear_session_history(game_session_id)
+        return result
+    except ValueError as e:
+        error_message = str(e)
+        if error_message == "Game session not found":
+            raise HTTPException(status_code=404, detail=error_message) from e
 
-    deleted = clear_rolls_by_session(game_session_id)
-    reset_game_session_points(game_session_id)
-
-    return DeleteHistoryResponse(
-        deleted_records=deleted,
-        player_points=0,
-    )
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.get("/{game_session_id}/history/export", response_model=ExportHistoryResponse)
