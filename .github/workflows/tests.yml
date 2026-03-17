@@ -19,17 +19,23 @@ jobs:
           python-version: "3.12" # Linting only needs to run once
           cache: 'pip'
 
-      - name: Install Linting Tools
-        run: |
-          pip install ruff mypy httpx # Add any types-packages if needed
+      - name: Install Ruff
+        run: pip install ruff
 
-      - name: Check Formatting (Ruff)
-        run: ruff format --check .
+      - name: Install Black
+        run: pip install black
 
-      - name: Lint (Ruff)
+      - name: Install MyPy
+        run: pip install mypy
+
+
+      - name: Run Ruff
         run: ruff check .
 
-      - name: Type Check (MyPy)
+      - name: Check formatting
+        run: black --check .
+
+      - name: Run MyPy
         run: mypy src/dice_game
 
   # --- EXISTING JOB: UNIT TESTS ---
