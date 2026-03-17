@@ -34,7 +34,9 @@ def points_for_turn(game_config: GameConfig, result: RollResult) -> int:
     return game_config.points.draw
 
 
-def build_temp_result(context: RollContext, rolls: list[int], player_points: int) -> RollResult:
+def build_temp_result(
+    context: RollContext, rolls: list[int], player_points: int
+) -> RollResult:
     return RollResult(
         context=context,
         rolls=rolls,
@@ -61,7 +63,9 @@ def apply_turn_effects(state: TurnState, temp_result: RollResult, delta: int) ->
     return extra_turn
 
 
-def finalize_result(temp_result: RollResult, outcome: str, delta: int, player_points: int) -> RollResult:
+def finalize_result(
+    temp_result: RollResult, outcome: str, delta: int, player_points: int
+) -> RollResult:
     return RollResult(
         context=temp_result.context,
         rolls=temp_result.rolls,

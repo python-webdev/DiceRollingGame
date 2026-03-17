@@ -13,8 +13,9 @@ class Stats:
         self.roll_count += 1
         self.total_roll_value += total
         self.highest_total = max(self.highest_total, total)
-        self.lowest_total = total if self.lowest_total is None else min(
-            self.lowest_total, total)
+        self.lowest_total = (
+            total if self.lowest_total is None else min(self.lowest_total, total)
+        )
         if has_match:
             self.total_matches += 1
 

@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from typing import Final
 from enum import Enum, auto
 
-
 # ---------- Config ----------
 DICE_TYPES: Final[dict[str, int]] = {
     "D4": 4,
@@ -60,8 +59,9 @@ class Stats:
         self.roll_count += 1
         self.total_roll_value += total
         self.highest_total = max(self.highest_total, total)
-        self.lowest_total = total if self.lowest_total is None else min(
-            self.lowest_total, total)
+        self.lowest_total = (
+            total if self.lowest_total is None else min(self.lowest_total, total)
+        )
         if has_match:
             self.total_matches += 1
 
@@ -148,8 +148,7 @@ def ask_int(prompt: str, *, min_value: int | None = None) -> int:
             continue
 
         if min_value is not None and value < min_value:
-            print(
-                f"\nDice count must be at least {min_value}. Please try again.\n")
+            print(f"\nDice count must be at least {min_value}. Please try again.\n")
             continue
 
         return value
@@ -215,7 +214,8 @@ def print_turn_result(result: RollResult) -> None:
     rolled_numbers = ", ".join(map(str, result.rolls))
     print(f"\n🎲 You rolled: {rolled_numbers}")
     print(
-        f"Dice: {result.context.num_dice} × {result.context.dice_type} (Total: {result.total})")
+        f"Dice: {result.context.num_dice} × {result.context.dice_type} (Total: {result.total})"
+    )
 
     if result.has_match:
         label = "DOUBLES" if result.context.num_dice == 2 else "ALL MATCH"
@@ -255,15 +255,16 @@ def print_stats(stats: Stats, points_total: int) -> None:
 
 # ---------- Main ----------
 def get_roll_context() -> RollContext:
-    num_dice = ask_int(
-        "How many dice would you like to roll? ", min_value=MIN_DICE)
+    num_dice = ask_int("How many dice would you like to roll? ", min_value=MIN_DICE)
     mode = choose_mode()
     dice_type = choose_dice_type()
     sides = DICE_TYPES[dice_type]
     return RollContext(mode=mode, dice_type=dice_type, num_dice=num_dice, sides=sides)
 
 
-def build_temp_result(context: RollContext, rolls: list[int], player_points: int) -> RollResult:
+def build_temp_result(
+    context: RollContext, rolls: list[int], player_points: int
+) -> RollResult:
     return RollResult(
         context=context,
         rolls=rolls,
@@ -280,9 +281,9 @@ def resolve_turn(game_config: GameConfig, temp_result: RollResult) -> tuple[str,
 
 
 def apply_turn_effects(
-        state: TurnState,
-        temp_result: RollResult,
-        delta: int,
+    state: TurnState,
+    temp_result: RollResult,
+    delta: int,
 ) -> bool:
     """
     Mutates state (points + stats)

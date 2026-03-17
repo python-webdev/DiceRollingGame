@@ -257,15 +257,17 @@ def session_stats(game_session_id: str) -> SessionStatsRecord:
     return {
         "total_rolls": int(row["total_rolls"]),
         "total_roll_value": int(row["total_roll_value"]),
-        "highest_roll": int(row["highest_roll"])
-        if row["highest_roll"] is not None
-        else None,
-        "lowest_roll": int(row["lowest_roll"])
-        if row["lowest_roll"] is not None
-        else None,
-        "average_roll": round(float(row["average_roll"]), 2)
-        if row["average_roll"] is not None
-        else None,
+        "highest_roll": (
+            int(row["highest_roll"]) if row["highest_roll"] is not None else None
+        ),
+        "lowest_roll": (
+            int(row["lowest_roll"]) if row["lowest_roll"] is not None else None
+        ),
+        "average_roll": (
+            round(float(row["average_roll"]), 2)
+            if row["average_roll"] is not None
+            else None
+        ),
         "total_matches": int(row["total_matches"]),
     }
 
@@ -301,9 +303,9 @@ def overall_stats() -> OverallStatsRecord:
             if row["average_total"] is not None
             else None
         ),
-        "total_matches": int(row["total_matches"])
-        if row["total_matches"] is not None
-        else 0,
+        "total_matches": (
+            int(row["total_matches"]) if row["total_matches"] is not None else 0
+        ),
         "highest_total": (
             int(row["highest_total"]) if row["highest_total"] is not None else None
         ),

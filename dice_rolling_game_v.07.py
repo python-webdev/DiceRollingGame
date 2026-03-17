@@ -48,16 +48,19 @@ def update_stats(stats: dict, total: int, has_match: bool = False) -> None:
     stats["roll_count"] += 1
     stats["total_roll_value"] += total
     stats["highest_total"] = max(stats["highest_total"], total)
-    stats["lowest_total"] = total if stats["lowest_total"] is None else min(
-        stats["lowest_total"],
-        total
+    stats["lowest_total"] = (
+        total if stats["lowest_total"] is None else min(stats["lowest_total"], total)
     )
     if has_match:
         stats["total_matches"] += 1
 
 
 def average_total(stats: dict) -> float:
-    return 0.0 if stats["roll_count"] == 0 else stats["total_roll_value"] / stats["roll_count"]
+    return (
+        0.0
+        if stats["roll_count"] == 0
+        else stats["total_roll_value"] / stats["roll_count"]
+    )
 
 
 # ---------- Input helpers ----------
@@ -79,8 +82,7 @@ def ask_int(prompt: str, *, min_value: int | None = None) -> int:
             continue
 
         if min_value is not None and value < min_value:
-            print(
-                f"\nDice count must be at least {min_value}. Please try again.\n")
+            print(f"\nDice count must be at least {min_value}. Please try again.\n")
             continue
 
         return value
@@ -200,7 +202,8 @@ def print_turn_result(result: dict) -> None:
 
     print(f"\n🎲 You rolled: {rolled_numbers}")
     print(
-        f"Dice: {context_info['num_dice']} × {context_info['dice_type']} (Total: {total_roll_value})")
+        f"Dice: {context_info['num_dice']} × {context_info['dice_type']} (Total: {total_roll_value})"
+    )
 
     if match:
         label = "DOUBLES" if context_info["num_dice"] == 2 else "ALL MATCH"
@@ -249,12 +252,13 @@ def make_state() -> dict:
 
 
 def get_roll_context() -> dict:
-    num_dice = ask_int(
-        "How many dice would you like to roll? ", min_value=MIN_DICE)
+    num_dice = ask_int("How many dice would you like to roll? ", min_value=MIN_DICE)
     mode = choose_mode()
     dice_type = choose_dice_type()
     sides = DICE_TYPES[dice_type]
-    return make_roll_context(mode=mode, dice_type=dice_type, num_dice=num_dice, sides=sides)
+    return make_roll_context(
+        mode=mode, dice_type=dice_type, num_dice=num_dice, sides=sides
+    )
 
 
 def resolve_turn(game_config: dict, temp_result: dict) -> tuple[str, int]:
@@ -275,7 +279,9 @@ def apply_turn_effects(state: dict, temp_result: dict, delta: int) -> bool:
     return extra_turn
 
 
-def finalize_result(temp_result: dict, outcome: str, delta: int, points_total: int) -> dict:
+def finalize_result(
+    temp_result: dict, outcome: str, delta: int, points_total: int
+) -> dict:
     return {
         "context": temp_result["context"],
         "rolls": temp_result["rolls"],
@@ -293,10 +299,7 @@ def play_turn(state: dict) -> dict:
     outcome, delta = resolve_turn(state["game_config"], temp_result)
 
     extra_turn = apply_turn_effects(state, temp_result, delta)
-    result = finalize_result(
-        temp_result, outcome,
-        delta, state["player_points"]
-    )
+    result = finalize_result(temp_result, outcome, delta, state["player_points"])
 
     return {"result": result, "extra_turn": extra_turn}
 

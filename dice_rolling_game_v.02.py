@@ -16,18 +16,17 @@ import random
 roll_count = 0
 
 while True:
-    user_input = input('Roll the dice? (y/n): ').lower()
-    if user_input == 'y':
-        dice_input = input('How many dice would you like to roll? ')
+    user_input = input("Roll the dice? (y/n): ").lower()
+    if user_input == "y":
+        dice_input = input("How many dice would you like to roll? ")
         try:
             if not dice_input.isdigit():
-                raise ValueError(
-                    'Invalid input. Dice count must be a number.')
+                raise ValueError("Invalid input. Dice count must be a number.")
             num_dice = int(dice_input)
             if num_dice < 2:
-                raise ValueError('Dice count must be at least 2.')
+                raise ValueError("Dice count must be at least 2.")
         except ValueError as e:
-            print(f'\n{e} Please try again.\n')
+            print(f"\n{e} Please try again.\n")
             continue
 
         dice_rolls = [random.randint(1, 6) for _ in range(num_dice)]
@@ -37,26 +36,22 @@ while True:
         has_doubles = len(set(dice_rolls)) == 1
 
         if has_doubles:  # All dice show the same number
-            print(
-                f'\nYou rolled: {rolled_numbers} (Doubles! You get an extra turn!)')
+            print(f"\nYou rolled: {rolled_numbers} (Doubles! You get an extra turn!)")
             continue  # Allow the player to roll again immediately
 
         if total > 10:
-            print(
-                f'\nYou rolled: {rolled_numbers} (Congratulations! You win!)')
+            print(f"\nYou rolled: {rolled_numbers} (Congratulations! You win!)")
         elif total < 5:
-            print(
-                f'\nYou rolled: {rolled_numbers} (Sorry, you lose!)')
+            print(f"\nYou rolled: {rolled_numbers} (Sorry, you lose!)")
         else:
-            print(
-                f'\nYou rolled: {rolled_numbers} (It\'s a draw!)')
+            print(f"\nYou rolled: {rolled_numbers} (It's a draw!)")
 
-        print(f'Total score: {total}')
+        print(f"Total score: {total}")
         roll_count += 1
-        print(f'You have rolled the dice {roll_count} times. \n')
+        print(f"You have rolled the dice {roll_count} times. \n")
 
-    elif user_input == 'n':
-        print('Thank you for playing! Goodbye!')
+    elif user_input == "n":
+        print("Thank you for playing! Goodbye!")
         break
     else:
         print("Invalid input. Please enter 'y' or 'n'.")

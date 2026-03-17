@@ -30,8 +30,7 @@ def _column_exists(conn: sqlite3.Connection, table_name: str, column_name: str) 
 
 def init_db() -> None:
     with connection() as conn:
-        conn.execute(
-            """
+        conn.execute("""
             CREATE TABLE IF NOT EXISTS game_sessions (
                 id TEXT PRIMARY KEY,
                 player_points INTEGER NOT NULL DEFAULT 0,
@@ -39,11 +38,9 @@ def init_db() -> None:
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL
             )
-            """
-        )
+            """)
 
-        conn.execute(
-            """
+        conn.execute("""
             CREATE TABLE IF NOT EXISTS rolls (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 game_session_id TEXT NOT NULL,
@@ -60,8 +57,7 @@ def init_db() -> None:
                 points_total INTEGER NOT NULL,
                 FOREIGN KEY (game_session_id) REFERENCES game_sessions(id) ON DELETE CASCADE
             )
-            """
-        )
+            """)
 
         # Lightweight migration for older DBs
         if not _column_exists(conn, "rolls", "has_match"):

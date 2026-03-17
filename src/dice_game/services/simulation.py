@@ -18,8 +18,8 @@ class SimulationInputs:
 @dataclass(frozen=True)
 class SimulationCounts:
     match_count: int
-    outcome_counts: dict[str, int]          # win/draw/lose
-    total_distribution: dict[int, int]      # total -> frequency
+    outcome_counts: dict[str, int]  # win/draw/lose
+    total_distribution: dict[int, int]  # total -> frequency
 
 
 @dataclass(frozen=True)
@@ -36,7 +36,11 @@ class SimulationReport:
 
     @property
     def match_probability(self) -> float:
-        return 0.0 if self.config.trials == 0 else self.counts.match_count / self.config.trials
+        return (
+            0.0
+            if self.config.trials == 0
+            else self.counts.match_count / self.config.trials
+        )
 
     @classmethod
     def empty(cls, context: RollContext):
@@ -44,7 +48,7 @@ class SimulationReport:
         return cls(
             config=SimulationInputs(0, context.num_dice, context.sides),
             counts=SimulationCounts(0, {"win": 0, "draw": 0, "lose": 0}, {}),
-            averages=SimulationAverages(0.0, 0.0)
+            averages=SimulationAverages(0.0, 0.0),
         )
 
 
@@ -56,9 +60,7 @@ def simulate(
 ) -> SimulationReport:
     # 1. Define common input metadata
     config = SimulationInputs(
-        trials=max(0, trials),
-        dice=context.num_dice,
-        sides=context.sides
+        trials=max(0, trials), dice=context.num_dice, sides=context.sides
     )
 
     # 2. Guard Clause for zero/negative trials
@@ -66,7 +68,7 @@ def simulate(
         return SimulationReport(
             config=config,
             counts=SimulationCounts(0, {"win": 0, "draw": 0, "lose": 0}, {}),
-            averages=SimulationAverages(0.0, 0.0)
+            averages=SimulationAverages(0.0, 0.0),
         )
 
     # 3. Simulation Logic
@@ -105,10 +107,9 @@ def simulate(
         counts=SimulationCounts(
             match_count=match_count,
             outcome_counts=dict(outcome_counter),
-            total_distribution=dict(total_counter)
+            total_distribution=dict(total_counter),
         ),
         averages=SimulationAverages(
-            avg_total=total_sum / trials,
-            avg_points_delta=points_sum / trials
-        )
+            avg_total=total_sum / trials, avg_points_delta=points_sum / trials
+        ),
     )

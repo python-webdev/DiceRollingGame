@@ -19,6 +19,11 @@ pythonpath = ["src"]
 testpaths = ["tests"]
 addopts = "--cov=src/dice_game --cov-report=term-missing"
 
+[tool.black]
+target-version = ["py313"]
+line-length = 88
+skip-string-normalization = false
+
 [project.optional-dependencies]
 dev = [
   "pytest>=8.0",
