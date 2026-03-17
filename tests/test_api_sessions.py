@@ -106,6 +106,21 @@ def test_roll_with_invalid_session_returns_404(client: TestClient) -> None:
     assert response.json()["detail"] == "Game session not found"
 
 
+def test_roll_with_too_many_dice_returns_422(client: TestClient) -> None:
+    session_id = create_session(client)
+
+    response = client.post(
+        f"/sessions/{session_id}/roll",
+        json={
+            "mode": "classic",
+            "dice_type": "D6",
+            "num_dice": 21,
+        },
+    )
+
+    assert response.status_code == 422
+
+
 def test_roll_with_too_few_dice_returns_422(client: TestClient) -> None:
     session_id = create_session(client)
 

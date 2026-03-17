@@ -21,7 +21,7 @@ class DiceTypeInput(str, Enum):
 class RollRequest(BaseModel):
     mode: GameModeInput
     dice_type: DiceTypeInput
-    num_dice: int = Field(ge=2)
+    num_dice: int = Field(ge=2, le=20)
 
 
 class SessionResponse(BaseModel):
