@@ -2,25 +2,52 @@ name: Tests
 
 on:
   push:
+    branches: [ main ]
   pull_request:
+    branches: [ main ]
 
 jobs:
-  test:
+  # --- NEW JOB: LINTING & TYPE CHECKING ---
+  lint:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
 
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12" # Linting only needs to run once
+          cache: 'pip'
+
+      - name: Install Linting Tools
+        run: |
+          pip install ruff mypy httpx # Add any types-packages if needed
+
+      - name: Check Formatting (Ruff)
+        run: ruff format --check .
+
+      - name: Lint (Ruff)
+        run: ruff check .
+
+      - name: Type Check (MyPy)
+        run: mypy src/dice_game
+
+  # --- EXISTING JOB: UNIT TESTS ---
+  test:
+    needs: lint # Only run tests if linting passes
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v5
 
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "pip"
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
