@@ -25,4 +25,4 @@ line-length = 88
 skip-string-normalization = false
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "pytest-cov>=5.0"]
+dev = ["pytest", "pytest-cov", "httpx", "ruff", "black", "mypy"]
