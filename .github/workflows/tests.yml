@@ -2,32 +2,26 @@ name: Tests
 
 on:
   push:
-    branches: [ main ]
   pull_request:
-    branches: [ main ]
 
 jobs:
-  # --- NEW JOB: LINTING & TYPE CHECKING ---
   lint:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v5
 
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.12" # Linting only needs to run once
-          cache: 'pip'
+          python-version: "3.12"
+          cache: "pip"
 
-      - name: Install Ruff
-        run: pip install ruff
-
-      - name: Install Black
-        run: pip install black
-
-      - name: Install MyPy
-        run: pip install mypy
-
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install ruff black mypy
 
       - name: Run Ruff
         run: ruff check .
@@ -38,10 +32,10 @@ jobs:
       - name: Run MyPy
         run: mypy src/dice_game
 
-  # --- EXISTING JOB: UNIT TESTS ---
   test:
-    needs: lint # Only run tests if linting passes
+    needs: lint
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
@@ -53,7 +47,7 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'
+          cache: "pip"
 
       - name: Install dependencies
         run: |
