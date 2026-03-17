@@ -184,7 +184,7 @@ def main() -> None:
 
         if action == "t":
             stats_data = overall_stats_db()
-            print_overall_stats_from_db(stats_data)
+            print_overall_stats_from_db(dict(stats_data))
             continue
 
         if action == "q":
@@ -228,8 +228,8 @@ def main() -> None:
 
             # PRINT
             print_turn_result(outcome.result)
-            print_session_stats(state.stats, state.player_points)
-
+            if state.stats is not None:
+                print_session_stats(state.stats, state.player_points)
             # SAVE (every roll)
             save_roll(outcome.result)
 
