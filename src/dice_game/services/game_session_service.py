@@ -1,7 +1,6 @@
-from dice_game.api.schemas import RollResponse
 from dice_game.domain.config import GameConfig
 from dice_game.domain.constants import DICE_TYPES
-from dice_game.domain.models import RollContext, TurnState
+from dice_game.domain.models import RollContext, TurnOutcome, TurnState
 from dice_game.domain.modes import GameMode
 from dice_game.domain.stats import Stats
 from dice_game.services.logic import (
@@ -30,7 +29,7 @@ def play_session_turn(
     mode_name: str,
     dice_type: str,
     num_dice: int,
-) -> RollResponse:
+) -> TurnOutcome:
     session = get_game_session(game_session_id)
     if session is None:
         raise GameSessionNotFoundError("Game session not found")
@@ -67,12 +66,7 @@ def play_session_turn(
     update_game_session_points(game_session_id, result.points_total)
     save_roll(result)
 
-    return RollResponse(
-        game_session_id=game_session_id,
-        rolls=result.rolls,
-        total=result.total,
-        outcome=result.outcome,
-        points_delta=result.points_delta,
-        points_total=result.points_total,
+    return TurnOutcome(
+        result=result,
         extra_turn=extra_turn,
     )

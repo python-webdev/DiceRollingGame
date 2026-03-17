@@ -16,13 +16,21 @@ router = APIRouter(prefix="/sessions", tags=["roll"])
 @router.post("/{game_session_id}/roll", response_model=RollResponse)
 def roll(game_session_id: str, request: RollRequest):
     try:
-        result = play_session_turn(
+        turn_outcome = play_session_turn(
             game_session_id=game_session_id,
             mode_name=request.mode.value,
             dice_type=request.dice_type.value,
             num_dice=request.num_dice,
         )
-        return result
+        return RollResponse(
+            game_session_id=turn_outcome.result.context.game_session_id,
+            rolls=turn_outcome.result.rolls,
+            total=turn_outcome.result.total,
+            outcome=turn_outcome.result.outcome,
+            points_delta=turn_outcome.result.points_delta,
+            points_total=turn_outcome.result.points_total,
+            extra_turn=turn_outcome.extra_turn,
+        )
     except GameSessionNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
     except InvalidDiceTypeError as e:
