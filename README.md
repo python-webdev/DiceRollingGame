@@ -1,106 +1,222 @@
-# DiceRollingGame
+# Dice Rolling Game
 
-A lightweight Dice Rolling application exploring RNG (Random Number Generation) and event-driven logic with multiple game modes for varied gameplay experiences. Features comprehensive statistics tracking and a dynamic point system.
+A modern, feature-rich dice rolling application with dual interfaces (CLI and REST API), persistent game sessions, comprehensive statistics, and clean architecture design.
 
-## Features
+## 🎯 Features
 
-- **Three Game Modes**: Classic, Lucky, and Risk with distinct scoring rules
-- **Multiple Dice Types**: Choose from D4, D6, D8, D10, D12, or D20
-- **Dynamic Round Setup**: Select how many dice to roll (minimum 2)
-- **Point Tracking**: Gain/lose points across rounds based on outcomes
-- **Live Statistics**: Shows roll count, doubles, average, highest, and lowest values
-- **Input Validation**: Handles invalid yes/no, dice count, mode, and dice type entries
+### Core Gameplay
+- **Three Game Modes**: Classic, Lucky, and Risk with distinct scoring mechanics
+- **Six Dice Types**: D4, D6, D8, D10, D12, D20 support
+- **Dynamic Setup**: Roll 2+ dice per turn with customizable configurations
+- **Point System**: Gain/lose points based on outcomes and game mode rules
+- **Extra Turns**: Lucky mode grants bonus turns for doubles
 
-## Game Flow
+### Dual Interface Design
+- **🖥️ Interactive CLI**: Rich terminal interface with menus, pagination, and real-time stats
+- **🌐 REST API**: Full-featured FastAPI web service with OpenAPI documentation
+- **📊 Statistics Dashboard**: Live tracking of rolls, averages, best scores, and more
+- **💾 Persistent Storage**: SQLite database with game session management
 
-This is the round flow in the order the script executes:
+### Advanced Features
+- **Game Sessions**: Create, manage, and track multiple independent sessions
+- **Roll History**: Complete audit trail with filtering, pagination, and export
+- **Statistics Engine**: Comprehensive analytics and performance metrics
+- **Simulation Mode**: Monte Carlo simulations for strategy analysis
+- **CSV Export**: Historical data export for external analysis
 
-1. Game starts and initializes counters (rolls, points, doubles, roll stats).
-2. Prompt appears: `Roll the dice? (y/n)`.
-3. If `n`, game exits with a goodbye message.
-4. If `y`, player enters number of dice.
-5. Dice count is validated (must be numeric and at least 2).
-6. Player chooses mode: `Classic`, `Lucky`, or `Risk`.
-7. Mode is validated.
-8. Player chooses dice type: `D4`, `D6`, `D8`, `D10`, `D12`, or `D20`.
-9. Dice type is validated and mapped to number of sides.
-10. Script rolls all selected dice and calculates total score.
-11. Script checks for doubles (all dice values matching).
-12. Mode-specific win/lose/draw rules are applied and points are updated.
-13. In Lucky mode, doubles grant +10 points and an immediate extra turn.
-14. Roll count and statistics are displayed after completed rounds.
-15. Loop continues until player chooses `n` at the main prompt.
+## 🏗️ Architecture
 
-## Game Modes
+The application follows clean architecture principles with clear separation of concerns:
 
-The game features three distinct modes, each with unique rules and outcomes:
-
-### Classic Mode
-
-- Traditional dice rolling experience
-- **Win**: Total > 10 (+5 points)
-- **Draw**: Total = 10 (no points)
-- **Lose**: Total < 10 (-3 points)
-
-### Lucky Mode
-
-- Features special doubles mechanic
-- **Doubles**: If all dice match, get +10 points and an extra turn immediately!
-- **Win**: Total > 10 (+5 points)
-- **Draw**: Total = 10 (no points)
-- **Lose**: Total < 10 (-3 points)
-
-### Risk Mode
-
-- High-stakes gameplay with penalty for low rolls
-- **Risky Loss**: Total < 7 (-3 points)
-- **Win**: Total > 10 (+5 points)
-- **Draw**: Total 7-10 (no points)
-
-## Point System
-
-- **+10 points**: Rolling doubles (all dice same value) in Lucky mode
-- **+5 points**: Winning a round (total > 10)
-- **-3 points**: Losing a round or rolling risky (total < 7 in Risk mode)
-
-## Statistics Tracked
-
-The game automatically tracks and displays:
-
-- **Roll Count**: Total number of completed rolls
-- **Player Points**: Current point balance
-- **Average Roll**: Mean value across all rolls
-- **Total Doubles**: Number of times all dice matched
-- **Highest Roll**: Maximum total achieved
-- **Lowest Roll**: Minimum total achieved
-
-## How to Play
-
-1. Run the game: `python dice_rolling_game.py`
-2. Choose to roll dice or quit: `Roll the dice? (y/n)`
-3. If rolling, specify number of dice (minimum 2)
-4. Select a game mode: Classic, Lucky, or Risk
-5. View your results, points, and statistics
-6. Continue playing or quit
-
-## Requirements
-
-- Python 3.x
-- No external dependencies (uses built-in `random` module)
-
-## Installation & Usage
-
-```bash
-# Clone or download the file
-python dice_rolling_game.py
+```
+src/dice_game/
+├── api/               # REST API layer (FastAPI)
+│   ├── app.py        # Application factory and configuration
+│   ├── schemas.py    # Pydantic models for request/response validation
+│   └── routes/       # API endpoint definitions
+├── cli/              # Command-line interface
+│   ├── ui.py        # User input handling and menu logic
+│   └── printing.py  # Output formatting and display
+├── domain/           # Core business logic and models
+│   ├── models.py    # Domain entities and value objects
+│   ├── modes.py     # Game mode definitions
+│   ├── config.py    # Configuration management
+│   └── constants.py # Game constants and enums
+├── services/         # Application services and orchestration
+│   ├── logic.py     # Core game logic implementation
+│   ├── simulation.py # Monte Carlo simulation engine
+│   └── game_session_service.py # Session management
+└── storage/          # Data persistence layer
+    ├── connection.py # Database connection management
+    ├── roll_repository.py # Roll data operations
+    └── session_repository.py # Session data operations
 ```
 
-## Input Validation
+### Layer Dependencies
+- **API Layer** → Services → Domain
+- **CLI Layer** → Services → Domain  
+- **Services** → Storage → Domain
+- **Storage** → Domain (models only)
 
-The game includes robust input validation:
+## 🚀 Installation & Setup
+
+### Prerequisites
+- Python 3.10+
+- pip (Python package manager)
+
+### Install Dependencies
+```bash
+# Install the package and dependencies
+pip install -e .
+
+# For development (includes testing tools)
+pip install -e ".[dev]"
+```
+
+## 🎮 Usage
+
+### Command Line Interface
+Start the interactive CLI game:
+```bash
+python -m dice_game
+```
+
+**Available CLI Commands:**
+- `(r)oll` - Roll dice with selected configuration
+- `(h)istory` - Browse roll history with filtering and pagination  
+- `s(t)ats` - View comprehensive statistics
+- `(s)imulate` - Run Monte Carlo simulations
+- `(e)xport` - Export roll history to CSV
+- `(c)lear` - Clear roll history
+- `(q)uit` - Exit game
+
+### REST API Server
+Start the web API server:
+```bash
+# Development server
+uvicorn dice_game.api.app:app --reload
+
+# Production server
+uvicorn dice_game.api.app:app --host 0.0.0.0 --port 8000
+```
+
+Visit `http://localhost:8000/docs` for interactive API documentation.
+
+## 🔗 API Endpoints
+
+### Session Management
+- `POST /sessions` - Create new game session
+- `GET /sessions/{id}` - Get session details
+- `DELETE /sessions/{id}` - Delete session
+
+### Game Actions  
+- `POST /sessions/{id}/roll` - Roll dice in session
+- `GET /sessions/{id}/stats` - Get session statistics
+
+### History & Data
+- `GET /sessions/{id}/history` - Get roll history (paginated)
+- `DELETE /sessions/{id}/history` - Clear session history
+- `GET /sessions/{id}/history/export` - Export session data to CSV
+
+## 🎯 Game Modes
+
+### Classic Mode
+Traditional dice rolling with balanced scoring:
+- **Win**: `total > 10` → +5 points
+- **Draw**: `total = 10` → 0 points  
+- **Lose**: `total < 10` → -3 points
+
+### Lucky Mode
+Features special doubles mechanic for bonus opportunities:
+- **Doubles Bonus**: All dice match → +10 points + extra turn
+- **Win**: `total > 10` → +5 points
+- **Draw**: `total = 10` → 0 points
+- **Lose**: `total < 10` → -3 points
+
+### Risk Mode
+High-stakes gameplay with increased penalty threshold:
+- **Win**: `total > 10` → +5 points
+- **Draw**: `total 7-10` → 0 points
+- **Risky Loss**: `total < 7` → -3 points
+
+## 📊 Statistics Tracking
+
+The application provides comprehensive analytics:
+
+### Session Statistics
+- Current point balance and session status
+- Roll count and success rates
+- Average roll values and distributions
+
+### Historical Analytics  
+- Best and worst rolls across all sessions
+- Outcome distribution by game mode  
+- Performance trends over time
+- Dice type effectiveness analysis
+
+### Simulation Engine
+- Monte Carlo analysis for strategy optimization
+- Probability distribution modeling
+- Risk assessment for different configurations
+
+## 🧪 Testing
+
+Run the comprehensive test suite:
+```bash
+# Run all tests
+pytest
+
+# Run with coverage report
+pytest --cov=src/dice_game --cov-report=html
+
+# Run specific test module
+pytest tests/test_api_sessions.py -v
+```
+
+## 🏗️ Development
+
+### Project Structure
+- **Domain-Driven Design**: Core business logic isolated from infrastructure
+- **Repository Pattern**: Clean data access abstraction
+- **Dependency Injection**: Loose coupling between layers
+- **Error Handling**: Comprehensive exception handling with proper HTTP status codes
+
+### Key Design Patterns
+- **Factory Pattern**: Application and service creation
+- **Repository Pattern**: Data access abstraction
+- **Command Pattern**: CLI action handling
+- **Strategy Pattern**: Game mode implementations
+
+## 📋 Requirements
+
+### Runtime Dependencies
+- `fastapi` - Modern web framework for building APIs
+- `uvicorn` - ASGI web server implementation
+- `pydantic` - Data validation using Python type hints
+
+### Development Dependencies  
+- `pytest` - Testing framework
+- `pytest-cov` - Coverage reporting
+
+## 📝 License
+
+This project is available under the MIT License.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git switch -C feature-name`
+3. Make your changes with tests
+4. Run the test suite: `pytest`
+5. Submit a pull request
+
+## 🔄 Version History
+
+- **v2.0.0** - Complete architectural rewrite with REST API, clean architecture, and persistent sessions
+- **v1.x** - Legacy single-file CLI implementation
 
 - Dice count must be a valid number ≥ 2
 - Game mode must be one of: classic, lucky, risk
 - Dice type must be one of: D4, D6, D8, D10, D12, D20
-- Main menu accepts only 'y' or 'n'
+- Main menu accepts only (r)oll (h)istory s(t)ats (s)imulate (e)xport to CSV (c)lear history (q)uit: 
 - Invalid inputs prompt retry with helpful messages
