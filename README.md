@@ -2,7 +2,7 @@
 
 A modern, feature-rich dice rolling application with dual interfaces (CLI and REST API), persistent game sessions, comprehensive statistics, and clean architecture design.
 
-## 🎯 Features
+## Features
 
 ### Core Gameplay
 - **Three Game Modes**: Classic, Lucky, and Risk with distinct scoring mechanics
@@ -12,10 +12,10 @@ A modern, feature-rich dice rolling application with dual interfaces (CLI and RE
 - **Extra Turns**: Lucky mode grants bonus turns for doubles
 
 ### Dual Interface Design
-- **🖥️ Interactive CLI**: Rich terminal interface with menus, pagination, and real-time stats
-- **🌐 REST API**: Full-featured FastAPI web service with OpenAPI documentation
-- **📊 Statistics Dashboard**: Live tracking of rolls, averages, best scores, and more
-- **💾 Persistent Storage**: SQLite database with game session management
+- **Interactive CLI**: Rich terminal interface with menus, pagination, and real-time stats
+- **REST API**: Full-featured FastAPI web service with OpenAPI documentation
+- **Statistics Dashboard**: Live tracking of rolls, averages, best scores, and more
+- **Persistent Storage**: SQLite database with game session management
 
 ### Advanced Features
 - **Game Sessions**: Create, manage, and track multiple independent sessions
@@ -24,7 +24,7 @@ A modern, feature-rich dice rolling application with dual interfaces (CLI and RE
 - **Simulation Mode**: Monte Carlo simulations for strategy analysis
 - **CSV Export**: Historical data export for external analysis
 
-## 🏗️ Architecture
+## Architecture
 
 The application follows clean architecture principles with clear separation of concerns:
 
@@ -58,7 +58,7 @@ src/dice_game/
 - **Services** → Storage → Domain
 - **Storage** → Domain (models only)
 
-## 🚀 Installation & Setup
+## Installation & Setup
 
 ### Prerequisites
 - Python 3.10+
@@ -73,7 +73,7 @@ pip install -e .
 pip install -e ".[dev]"
 ```
 
-## 🎮 Usage
+## Usage
 
 ### Command Line Interface
 Start the interactive CLI game:
@@ -102,23 +102,23 @@ uvicorn dice_game.api.app:app --host 0.0.0.0 --port 8000
 
 Visit `http://localhost:8000/docs` for interactive API documentation.
 
-## 🔗 API Endpoints
+## API Endpoints
 
 ### Session Management
 - `POST /sessions` - Create new game session
-- `GET /sessions/{id}` - Get session details
-- `DELETE /sessions/{id}` - Delete session
+- `GET /sessions/{game_session_id}` - Get session details
+- `DELETE /sessions/{game_session_id}` - Delete session
 
 ### Game Actions  
-- `POST /sessions/{id}/roll` - Roll dice in session
-- `GET /sessions/{id}/stats` - Get session statistics
+- `POST /sessions/{game_session_id}/roll` - Roll dice in session
+- `GET /sessions/{game_session_id}/stats` - Get session statistics
 
 ### History & Data
-- `GET /sessions/{id}/history` - Get roll history (paginated)
-- `DELETE /sessions/{id}/history` - Clear session history
-- `GET /sessions/{id}/history/export` - Export session data to CSV
+- `GET /sessions/{game_session_id}/history` - Get roll history (paginated)
+- `DELETE /sessions/{game_session_id}/history` - Clear session history
+- `GET /sessions/{game_session_id}/history/export` - Export session data to CSV
 
-## 🎯 Game Modes
+## Game Modes
 
 ### Classic Mode
 Traditional dice rolling with balanced scoring:
@@ -139,7 +139,7 @@ High-stakes gameplay with increased penalty threshold:
 - **Draw**: `total 7-10` → 0 points
 - **Risky Loss**: `total < 7` → -3 points
 
-## 📊 Statistics Tracking
+## Statistics Tracking
 
 The application provides comprehensive analytics:
 
@@ -159,7 +159,7 @@ The application provides comprehensive analytics:
 - Probability distribution modeling
 - Risk assessment for different configurations
 
-## 🧪 Testing
+## Testing
 
 Run the comprehensive test suite:
 ```bash
@@ -173,7 +173,7 @@ pytest --cov=src/dice_game --cov-report=html
 pytest tests/test_api_sessions.py -v
 ```
 
-## 🏗️ Development
+## Development
 
 ### Project Structure
 - **Domain-Driven Design**: Core business logic isolated from infrastructure
@@ -187,7 +187,7 @@ pytest tests/test_api_sessions.py -v
 - **Command Pattern**: CLI action handling
 - **Strategy Pattern**: Game mode implementations
 
-## 📋 Requirements
+## Requirements
 
 ### Runtime Dependencies
 - `fastapi` - Modern web framework for building APIs
@@ -198,11 +198,11 @@ pytest tests/test_api_sessions.py -v
 - `pytest` - Testing framework
 - `pytest-cov` - Coverage reporting
 
-## 📝 License
+## License
 
 This project is available under the MIT License.
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git switch -C feature-name`
@@ -210,7 +210,7 @@ This project is available under the MIT License.
 4. Run the test suite: `pytest`
 5. Submit a pull request
 
-## 🔄 Version History
+## Version History
 
 - **v2.0.0** - Complete architectural rewrite with REST API, clean architecture, and persistent sessions
 - **v1.x** - Legacy single-file CLI implementation
