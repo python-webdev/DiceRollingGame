@@ -56,10 +56,11 @@ def apply_turn_effects(state: TurnState, temp_result: RollResult, delta: int) ->
     extra_turn = temp_result.is_lucky_match
 
     state.player_points += delta
-    state.stats.update(
-        temp_result.total,
-        temp_result.has_match,
-    )
+    if state.stats is not None:
+        state.stats.update(
+            temp_result.total,
+            temp_result.has_match,
+        )
     return extra_turn
 
 

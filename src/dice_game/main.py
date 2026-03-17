@@ -1,3 +1,5 @@
+from typing import cast
+
 from .cli.printing import (
     print_best_roll,
     print_distribution_sorted,
@@ -28,6 +30,7 @@ from .services.logic import (
 )
 from .services.simulation import simulate
 from .storage.connection import init_db
+from .storage.history_types import HistoryRecord
 from .storage.roll_repository import (
     best_roll as best_roll_db,
 )
@@ -72,11 +75,14 @@ def browse_history_paginated(
     offset = 0
 
     while True:
-        records = paginated_rolls(
-            offset=offset,
-            limit=page_size,
-            sides=sides,
-            dice=dice,
+        records = cast(
+            list[HistoryRecord],
+            paginated_rolls(
+                offset=offset,
+                limit=page_size,
+                sides=sides,
+                dice=dice,
+            ),
         )
 
         print_history_page_info(
@@ -183,8 +189,9 @@ def main() -> None:
 
         if action == "q":
             print("\nThank you for playing! Goodbye!\n")
-            print_session_stats(state.stats, state.player_points)
-            break
+            if state.stats is not None:
+                print_session_stats(state.stats, state.player_points)
+            return
 
         if action == "c":
             confirm = (

@@ -182,14 +182,14 @@ def print_history_page_info(
 def print_overall_stats(
     stats: dict[str, int | float | None],
 ) -> None:
-    total_rolls = int(stats["total_rolls"])
+    total_rolls = int(stats["total_rolls"] or 0)
 
     if total_rolls == 0:
         print("\nNo rolls in history, so no stats to show.\n")
         return
 
     average_total = stats["average_total"]
-    total_matches = int(stats["total_matches"])
+    total_matches = int(stats["total_matches"] or 0)
     highest_total = stats["highest_total"]
     lowest_total = stats["lowest_total"]
 
