@@ -27,7 +27,7 @@ from .services.logic import (
     roll_dice,
 )
 from .services.simulation import simulate
-from .storage.connection import init_db
+from .storage.db_init import init_db
 from .storage.history_types import HistoryRecord
 from .storage.roll_repository import (
     best_roll as best_roll_db,
