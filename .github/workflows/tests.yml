@@ -73,34 +73,58 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          load: true
           push: false
           tags: dice-game-api:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Verify Docker image
+        run: |
+          echo "Listing available Docker images:"
+          docker images
+          echo "Checking for our test image:"
+          docker images dice-game-api:test
 
       - name: Test Docker container
         run: |
           # Start container in background
           docker run -d -p 8000:8000 --name test-container dice-game-api:test
           
-          # Wait for container to be ready
-          sleep 10
+          # Wait for container to be ready and show logs
+          echo "Waiting for container to start..."
+          sleep 15
+          
+          echo "Container status:"
+          docker ps -a
+          
+          echo "Container logs:"
+          docker logs test-container
           
           # Test API endpoints
+          echo "Testing API documentation endpoint..."
           curl -f http://localhost:8000/docs || exit 1
           
+          echo "Testing API health..."
+          curl -f http://localhost:8000/openapi.json || exit 1
+          
           # Test API functionality
+          echo "Creating game session..."
           SESSION_ID=$(curl -s -X POST http://localhost:8000/sessions \
             -H "Content-Type: application/json" \
             -d '{"game_mode": "classic"}' | \
-            python -c "import sys, json; print(json.load(sys.stdin)['game_session_id'])")
+            python3 -c "import sys, json; print(json.load(sys.stdin)['game_session_id'])")
+          
+          echo "Created session: $SESSION_ID"
           
           # Test dice roll
+          echo "Testing dice roll..."
           curl -f -X POST http://localhost:8000/sessions/$SESSION_ID/roll \
             -H "Content-Type: application/json" \
             -d '{"num_dice": 2, "dice_type": "D6", "mode": "classic"}' || exit 1
           
           # Test stats endpoint
+          echo "Testing stats endpoint..."
           curl -f http://localhost:8000/sessions/$SESSION_ID/stats || exit 1
           
           echo "✅ All Docker container tests passed!"
