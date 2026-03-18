@@ -22,3 +22,14 @@ class Stats:
     @property
     def average_total(self) -> float:
         return 0.0 if self.roll_count == 0 else self.total_roll_value / self.roll_count
+
+
+@dataclass
+class OverallStats:
+    """Statistics across all game sessions in the database."""
+
+    total_rolls: int
+    average_total: float | None
+    total_matches: int
+    highest_total: int | None
+    lowest_total: int | None

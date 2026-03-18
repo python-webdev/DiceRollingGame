@@ -5,12 +5,10 @@ from .cli.printing import (
     print_distribution_sorted,
     print_history,
     print_history_page_info,
+    print_overall_stats,
     print_session_stats,
     print_simulation_report,
     print_turn_result,
-)
-from .cli.printing import (
-    print_overall_stats as print_overall_stats_from_db,
 )
 from .cli.ui import (
     ask_int,
@@ -184,7 +182,7 @@ def main() -> None:
 
         if action == "t":
             stats_data = overall_stats_db()
-            print_overall_stats_from_db(dict(stats_data))
+            print_overall_stats(stats_data)
             continue
 
         if action == "q":

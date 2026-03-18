@@ -1,7 +1,7 @@
 import json
 
 from ..domain.models import RollResult
-from ..domain.stats import Stats
+from ..domain.stats import OverallStats, Stats
 from ..services.simulation import SimulationReport
 from ..storage.history_types import HistoryRecord
 
@@ -179,36 +179,27 @@ def print_history_page_info(
     print(f"\nShowing records {start}-{end} of {total} records.\n")
 
 
-def print_overall_stats(
-    stats: dict[str, int | float | None],
-) -> None:
-    total_rolls = int(stats["total_rolls"] or 0)
-
-    if total_rolls == 0:
+def print_overall_stats(stats: OverallStats) -> None:
+    if stats.total_rolls == 0:
         print("\nNo rolls in history, so no stats to show.\n")
         return
 
-    average_total = stats["average_total"]
-    total_matches = int(stats["total_matches"] or 0)
-    highest_total = stats["highest_total"]
-    lowest_total = stats["lowest_total"]
-
     print("\n---- Database Overall Stats ----")
-    print(f"Total rolls: {total_rolls}")
+    print(f"Total rolls: {stats.total_rolls}")
     print(
-        f"Average total: {average_total:.2f}"
-        if average_total is not None
+        f"Average total: {stats.average_total:.2f}"
+        if stats.average_total is not None
         else "Average total is not available"
     )
-    print(f"Total matches: {total_matches}")
+    print(f"Total matches: {stats.total_matches}")
     print(
-        f"Highest total: {highest_total}"
-        if highest_total is not None
+        f"Highest total: {stats.highest_total}"
+        if stats.highest_total is not None
         else "Highest total is not available"
     )
     print(
-        f"Lowest total: {lowest_total}"
-        if lowest_total is not None
+        f"Lowest total: {stats.lowest_total}"
+        if stats.lowest_total is not None
         else "Lowest total is not available"
     )
     print("--------------------------------\n")

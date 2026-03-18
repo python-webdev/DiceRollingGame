@@ -6,6 +6,7 @@ from typing import TypedDict, cast
 
 from ..domain.config import GameConfig
 from ..domain.models import RollResult
+from ..domain.stats import OverallStats
 from .connection import connection, utc_now_iso
 from .history_types import DatabaseRecord
 
@@ -272,7 +273,7 @@ def session_stats(game_session_id: str) -> SessionStatsRecord:
     }
 
 
-def overall_stats() -> OverallStatsRecord:
+def overall_stats() -> OverallStats:
     query = """
     SELECT
         COUNT(*) AS total_rolls,
@@ -288,31 +289,31 @@ def overall_stats() -> OverallStatsRecord:
         row = cur.fetchone()
 
     if row is None or int(row["total_rolls"]) == 0:
-        return {
-            "total_rolls": 0,
-            "average_total": None,
-            "total_matches": 0,
-            "highest_total": None,
-            "lowest_total": None,
-        }
+        return OverallStats(
+            total_rolls=0,
+            average_total=None,
+            total_matches=0,
+            highest_total=None,
+            lowest_total=None,
+        )
 
-    return {
-        "total_rolls": int(row["total_rolls"]),
-        "average_total": (
+    return OverallStats(
+        total_rolls=int(row["total_rolls"]),
+        average_total=(
             round(float(row["average_total"]), 2)
             if row["average_total"] is not None
             else None
         ),
-        "total_matches": (
+        total_matches=(
             int(row["total_matches"]) if row["total_matches"] is not None else 0
         ),
-        "highest_total": (
+        highest_total=(
             int(row["highest_total"]) if row["highest_total"] is not None else None
         ),
-        "lowest_total": (
+        lowest_total=(
             int(row["lowest_total"]) if row["lowest_total"] is not None else None
         ),
-    }
+    )
 
 
 def export_rolls_to_csv(file_path: str | None = None) -> int:

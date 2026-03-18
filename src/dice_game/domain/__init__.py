@@ -5,7 +5,7 @@ from .constants import (
 )
 from .models import RollContext, RollResult, TurnOutcome, TurnState
 from .modes import GameMode
-from .stats import Stats
+from .stats import OverallStats, Stats
 
 __all__ = [
     "ExportConfig",
@@ -20,4 +20,5 @@ __all__ = [
     "TurnState",
     "GameMode",
     "Stats",
+    "OverallStats",
 ]
