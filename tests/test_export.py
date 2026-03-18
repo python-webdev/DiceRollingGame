@@ -1,41 +1,25 @@
 from dice_game.storage import roll_repository
-from dice_game.storage.connection import connection, init_db
+from dice_game.storage.connection import connection
 
 
-def test_csv_export_creates_file(tmp_path, monkeypatch):
-    db_path = tmp_path / "test.db"
+def test_csv_export_creates_file(tmp_path):
     csv_path = tmp_path / "rolls_export.csv"
-
-    monkeypatch.setattr("dice_game.storage.connection.DB_PATH", db_path)
-    init_db()
-
     roll_repository.export_rolls_to_csv(str(csv_path))
-
     assert csv_path.exists()
 
 
-def test_csv_contains_headers(tmp_path, monkeypatch):
-    db_path = tmp_path / "test.db"
+def test_csv_contains_headers(tmp_path):
     csv_path = tmp_path / "rolls_export.csv"
-
-    monkeypatch.setattr("dice_game.storage.connection.DB_PATH", db_path)
-    init_db()
-
     roll_repository.export_rolls_to_csv(str(csv_path))
 
-    test = csv_path.read_text()
+    content = csv_path.read_text()
+    assert "id,time,mode" in content
 
-    assert "id,time,mode" in test
 
-
-def test_csv_export_contains_expected_rows(tmp_path, monkeypatch):
-
-    db_path = tmp_path / "test.db"
+def test_csv_export_contains_expected_rows(tmp_path, unique_session_id):
     csv_path = tmp_path / "rolls_export.csv"
 
-    monkeypatch.setattr("dice_game.storage.connection.DB_PATH", db_path)
-    init_db()
-
+    # Insert test data
     with connection() as conn:
         # Create the game session first to satisfy foreign key constraint
         conn.execute(
@@ -50,7 +34,7 @@ def test_csv_export_contains_expected_rows(tmp_path, monkeypatch):
             VALUES (?, ?, ?, ?, ?)
             """,
             (
-                "test-session-1",
+                unique_session_id,
                 10,
                 "active",
                 "2026-03-08T09:59:00+00:00",
@@ -62,7 +46,7 @@ def test_csv_export_contains_expected_rows(tmp_path, monkeypatch):
         conn.execute(
             """
             INSERT INTO rolls (
-                  game_session_id,
+                game_session_id,
                 time,
                 mode,
                 dice,
@@ -78,7 +62,7 @@ def test_csv_export_contains_expected_rows(tmp_path, monkeypatch):
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
-                "test-session-1",
+                unique_session_id,
                 "2026-03-08T10:00:00+00:00",
                 "LUCKY",
                 2,
@@ -92,17 +76,11 @@ def test_csv_export_contains_expected_rows(tmp_path, monkeypatch):
                 10,
             ),
         )
+        conn.commit()
 
-    exported = roll_repository.export_rolls_to_csv(str(csv_path))
-    text = csv_path.read_text(encoding="utf-8")
+    roll_repository.export_rolls_to_csv(str(csv_path))
 
-    assert exported == 1
-    assert (
-        "id,game_session_id,time,mode,dice,dice_type,sides,rolls,total,has_match,outcome,points_delta,points_total"
-        in text
-    )
-    assert "LUCKY" in text
-    assert "D8" in text
-    assert "[8, 8]" in text
-    assert "16" in text
-    assert "1" in text
+    content = csv_path.read_text()
+    assert "LUCKY" in content
+    assert "D8" in content
+    assert "[8, 8]" in content

@@ -1,4 +1,5 @@
-from .connection import init_db
+from .connection import connection, utc_now_iso
+from .db_init import init_db
 from .roll_repository import (
     OverallStatsRecord,
     SessionStatsRecord,
@@ -48,4 +49,6 @@ __all__ = [
     "update_game_session_points",
     "reset_game_session_points",
     "delete_game_session",
+    "connection",
+    "utc_now_iso",
 ]
