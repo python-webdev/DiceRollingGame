@@ -62,15 +62,28 @@ src/dice_game/
 
 ### Prerequisites
 - Python 3.10+
-- pip (Python package manager)
+- pip (Python package manager) 
+- Docker (optional, for containerized deployment)
 
-### Install Dependencies
+### Option 1: Local Python Installation
 ```bash
 # Install the package and dependencies
 pip install -e .
 
 # For development (includes testing tools)
 pip install -e ".[dev]"
+```
+
+### Option 2: Docker Container
+```bash
+# Build the Docker image
+docker build -t dice-game-api .
+
+# Run the containerized API
+docker run -p 8000:8000 dice-game-api
+
+# Run in background
+docker run -d -p 8000:8000 dice-game-api
 ```
 
 ## Usage
@@ -91,16 +104,51 @@ python -m dice_game
 - `(q)uit` - Exit game
 
 ### REST API Server
-Start the web API server:
+
+**Local Development:**
 ```bash
-# Development server
+# Development server with auto-reload
 uvicorn dice_game.api.app:app --reload
 
 # Production server
 uvicorn dice_game.api.app:app --host 0.0.0.0 --port 8000
 ```
 
+**Docker Container:**
+```bash
+# Build and run containerized API
+docker build -t dice-game-api .
+docker run -p 8000:8000 dice-game-api
+
+# Or run pre-built image in background
+docker run -d -p 8000:8000 dice-game-api
+```
+
+**Docker Compose (Recommended):**
+```bash
+# Production deployment
+docker-compose up -d
+
+# Development with auto-reload
+docker-compose --profile dev up
+
+# View logs
+docker-compose logs -f
+```
+
 Visit `http://localhost:8000/docs` for interactive API documentation.
+
+**Container Management:**
+```bash
+# View running containers
+docker ps
+
+# Stop container
+docker stop <container_id>
+
+# View container logs
+docker logs <container_id>
+```
 
 ## API Endpoints
 
@@ -173,6 +221,36 @@ pytest --cov=src/dice_game --cov-report=html
 pytest tests/test_api_sessions.py -v
 ```
 
+## Deployment
+
+### Docker Containerization
+The application is fully containerized with Docker for easy deployment:
+
+**Features:**
+- **Optimized Docker build** - Multi-stage build with layer caching
+- **Security focused** - .dockerignore excludes sensitive files
+- **Fast builds** - Minimal build context (5.36kB)
+- **Production ready** - Uvicorn ASGI server with proper configuration
+
+**Docker Commands:**
+```bash
+# Build optimized image
+docker build -t dice-game-api .
+
+# Run with port mapping
+docker run -p 8000:8000 dice-game-api
+
+# Production deployment
+docker run -d --name dice-api -p 8000:8000 --restart unless-stopped dice-game-api
+```
+
+### CI/CD Pipeline
+Automated testing and Docker builds via GitHub Actions:
+- **Code quality** - Ruff linting, Black formatting, MyPy type checking
+- **Multi-version testing** - Python 3.11, 3.12, 3.13 compatibility  
+- **Docker validation** - Container build and API functionality tests
+- **Coverage reporting** - Comprehensive test coverage analysis
+
 ## Development
 
 ### Project Structure
@@ -180,6 +258,7 @@ pytest tests/test_api_sessions.py -v
 - **Repository Pattern**: Clean data access abstraction
 - **Dependency Injection**: Loose coupling between layers
 - **Error Handling**: Comprehensive exception handling with proper HTTP status codes
+- **Containerization**: Docker-first deployment strategy
 
 ### Key Design Patterns
 - **Factory Pattern**: Application and service creation

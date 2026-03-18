@@ -58,3 +58,55 @@ jobs:
 
       - name: Run tests
         run: pytest --cov=src/dice_game --cov-report=term-missing
+
+  docker:
+    needs: lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: dice-game-api:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Test Docker container
+        run: |
+          # Start container in background
+          docker run -d -p 8000:8000 --name test-container dice-game-api:test
+          
+          # Wait for container to be ready
+          sleep 10
+          
+          # Test API endpoints
+          curl -f http://localhost:8000/docs || exit 1
+          
+          # Test API functionality
+          SESSION_ID=$(curl -s -X POST http://localhost:8000/sessions \
+            -H "Content-Type: application/json" \
+            -d '{"game_mode": "classic"}' | \
+            python -c "import sys, json; print(json.load(sys.stdin)['game_session_id'])")
+          
+          # Test dice roll
+          curl -f -X POST http://localhost:8000/sessions/$SESSION_ID/roll \
+            -H "Content-Type: application/json" \
+            -d '{"num_dice": 2, "dice_type": "D6", "mode": "classic"}' || exit 1
+          
+          # Test stats endpoint
+          curl -f http://localhost:8000/sessions/$SESSION_ID/stats || exit 1
+          
+          echo "✅ All Docker container tests passed!"
+
+      - name: Clean up
+        if: always()
+        run: |
+          docker stop test-container || true
+          docker rm test-container || true
