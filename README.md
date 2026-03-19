@@ -9,9 +9,9 @@ A production-ready REST API demonstrating enterprise software development practi
 - **Clean Architecture**: Domain-driven design with proper separation of concerns
 - **RESTful API Development**: FastAPI with comprehensive endpoint design and validation
 - **Database Design**: SQLite with repository pattern for data persistence
-- **Testing Strategy**: Unit tests, integration tests, and CI/CD pipeline (95%+ coverage)
+- **Testing Strategy**: Pytest with unit/integration tests and CI/CD pipeline (95%+ coverage)
 - **DevOps Practices**: Docker containerization, GitHub Actions CI, and production deployment
-- **Code Quality**: Type hints, linting (Ruff), formatting (Black), and comprehensive error handling
+- **Code Quality**: Type hints (MyPy), linting (Ruff), formatting (Black), and comprehensive error handling
 - **Documentation**: API docs, architectural documentation, and developer onboarding guides
 
 ## Why This Project Exists
