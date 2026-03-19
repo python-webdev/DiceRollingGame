@@ -1,9 +1,26 @@
 Metadata-Version: 2.4
 Name: dice-game
-Version: 0.1.0
+Version: 2.0.0
+Summary: Modern dice rolling game with CLI and REST API interfaces, featuring persistent sessions and Docker containerization
+Author: python-webdev
+Keywords: dice,game,api,cli,docker,fastapi
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Games/Entertainment
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
 Requires-Python: >=3.10
 Requires-Dist: fastapi
 Requires-Dist: uvicorn
 Provides-Extra: dev
-Requires-Dist: pytest>=8.0; extra == "dev"
-Requires-Dist: pytest-cov>=5.0; extra == "dev"
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: pytest-cov; extra == "dev"
+Requires-Dist: httpx; extra == "dev"
+Requires-Dist: ruff; extra == "dev"
+Requires-Dist: black; extra == "dev"
+Requires-Dist: mypy; extra == "dev"
