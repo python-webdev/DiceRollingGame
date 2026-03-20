@@ -8,6 +8,18 @@ A production-ready REST API demonstrating enterprise software development practi
 
 Try the interactive API documentation to explore all endpoints and test the functionality directly in your browser.
 
+## API Preview
+
+![Dice Game API Swagger UI](
+  ![alt text](swagger-ui-screenshot.png)
+)
+
+The interactive Swagger UI provides a comprehensive overview of all available endpoints, organized by functionality:
+- **Sessions**: Create, manage, and delete game sessions
+- **Roll**: Execute dice rolls with different game modes and dice types
+- **History**: Access, export, and manage roll history
+- **Stats**: View detailed session statistics and analytics
+
 ---
 
 ## What This Project Demonstrates 
