@@ -10,9 +10,10 @@ Try the interactive API documentation to explore all endpoints and test the func
 
 ## API Preview
 
-![Dice Game API Swagger UI](
+![Dice Game API Swagger UI](docs/swagger-ui-screenshot.png)
   ![alt text](swagger-ui-screenshot.png)
 )
+<img src="/assets/swagger-ui-screenshot.png" alt="Swagger UI Screenshot" width="400">
 
 The interactive Swagger UI provides a comprehensive overview of all available endpoints, organized by functionality:
 - **Sessions**: Create, manage, and delete game sessions
