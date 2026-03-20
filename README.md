@@ -2,6 +2,12 @@
 
 A production-ready REST API demonstrating enterprise software development practices through a dice game implementation with session-based state management, clean architecture, and comprehensive testing.
 
+## Live Demo
+
+**API Docs:** https://dice-game-api-d15y.onrender.com/docs
+
+Try the interactive API documentation to explore all endpoints and test the functionality directly in your browser.
+
 ---
 
 ## What This Project Demonstrates 
@@ -48,6 +54,29 @@ Follows **clean architecture principles** with clear separation of concerns:
 - **Repository Layer** (`storage/`): Database operations and data access
 - **Domain Layer** (`domain/`): Core models, business rules, and constants
 - **CLI Interface** (`cli/`): Command-line user interface
+
+## Architecture Diagram
+
+```text
+Client
+  ↓
+FastAPI Routes
+  ↓
+Services
+  ↓
+Repositories
+  ↓
+SQLite
+
+Services
+  ↓
+Domain Models / Game Logic
+```
+
+The API layer handles HTTP requests and validation.
+Services coordinate gameplay rules and session workflows.
+Repositories isolate database access.
+Domain models keep game state and rules separate from infrastructure.
 
 ```
 src/dice_game/
@@ -100,6 +129,118 @@ src/dice_game/
 
 ### Interactive Documentation
 Visit `http://localhost:8000/docs` for comprehensive API documentation with interactive testing.
+
+## cURL Examples
+
+Create a session:
+
+```bash
+curl -X POST https://dice-game-api-d15y.onrender.com/sessions
+```
+
+Then use the returned `game_session_id` in these requests:
+
+### Roll Dice (Various Game Modes)
+
+**Classic Mode:**
+```bash
+curl -X POST "https://dice-game-api-d15y.onrender.com/sessions/<GAME_SESSION_ID>/roll" \
+  -H "Content-Type: application/json" \
+  -d '{"mode":"classic","dice_type":"D6","num_dice":2}'
+```
+
+**Lucky Mode:**
+```bash
+curl -X POST "https://dice-game-api-d15y.onrender.com/sessions/<GAME_SESSION_ID>/roll" \
+  -H "Content-Type: application/json" \
+  -d '{"mode":"lucky","dice_type":"D6","num_dice":2}'
+```
+
+**Risk Mode:**
+```bash
+curl -X POST "https://dice-game-api-d15y.onrender.com/sessions/<GAME_SESSION_ID>/roll" \
+  -H "Content-Type: application/json" \
+  -d '{"mode":"risk","dice_type":"D6","num_dice":2}'
+```
+
+**With Different Dice Types:**
+```bash
+# D8 dice
+curl -X POST "https://dice-game-api-d15y.onrender.com/sessions/<GAME_SESSION_ID>/roll" \
+  -H "Content-Type: application/json" \
+  -d '{"mode":"classic","dice_type":"D8","num_dice":3}'
+
+# D12 dice
+curl -X POST "https://dice-game-api-d15y.onrender.com/sessions/<GAME_SESSION_ID>/roll" \
+  -H "Content-Type: application/json" \
+  -d '{"mode":"classic","dice_type":"D12","num_dice":1}'
+```
+
+### Session Management
+
+**Get Session Details:**
+```bash
+curl "https://dice-game-api-d15y.onrender.com/sessions/<GAME_SESSION_ID>"
+```
+
+**Get Session Statistics:**
+```bash
+curl "https://dice-game-api-d15y.onrender.com/sessions/<GAME_SESSION_ID>/stats"
+```
+
+**Delete Session:**
+```bash
+curl -X DELETE "https://dice-game-api-d15y.onrender.com/sessions/<GAME_SESSION_ID>"
+```
+
+### History Management
+
+**Get Roll History (Paginated):**
+```bash
+# Default pagination
+curl "https://dice-game-api-d15y.onrender.com/sessions/<GAME_SESSION_ID>/history"
+
+# With pagination parameters
+curl "https://dice-game-api-d15y.onrender.com/sessions/<GAME_SESSION_ID>/history?page=1&limit=10"
+```
+
+**Export Roll History to CSV:**
+```bash
+curl "https://dice-game-api-d15y.onrender.com/sessions/<GAME_SESSION_ID>/history/export" \
+  -o "dice_game_export.csv"
+```
+
+**Clear Session History:**
+```bash
+curl -X DELETE "https://dice-game-api-d15y.onrender.com/sessions/<GAME_SESSION_ID>/history"
+```
+
+### Complete Workflow Example
+
+```bash
+# 1. Create a new session
+SESSION_RESPONSE=$(curl -s -X POST https://dice-game-api-d15y.onrender.com/sessions)
+SESSION_ID=$(echo $SESSION_RESPONSE | grep -o '"game_session_id":"[^"]*' | grep -o '[^"]*$')
+
+# 2. Roll dice multiple times
+curl -X POST "https://dice-game-api-d15y.onrender.com/sessions/$SESSION_ID/roll" \
+  -H "Content-Type: application/json" \
+  -d '{"mode":"classic","dice_type":"D6","num_dice":2}'
+
+curl -X POST "https://dice-game-api-d15y.onrender.com/sessions/$SESSION_ID/roll" \
+  -H "Content-Type: application/json" \
+  -d '{"mode":"lucky","dice_type":"D8","num_dice":3}'
+
+# 3. Check stats
+curl "https://dice-game-api-d15y.onrender.com/sessions/$SESSION_ID/stats"
+
+# 4. View history
+curl "https://dice-game-api-d15y.onrender.com/sessions/$SESSION_ID/history"
+
+# 5. Export data
+curl "https://dice-game-api-d15y.onrender.com/sessions/$SESSION_ID/history/export" \
+  -o "session_${SESSION_ID}_export.csv"
+```
 
 ---
 
